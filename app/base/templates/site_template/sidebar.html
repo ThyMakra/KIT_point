@@ -75,6 +75,20 @@
             <li><a href="/fixed_footer">Fixed Footer</a></li>
           </ul>
         </li>
+{#        add new#}
+        {% if 'ADMIN'== current_user.roles[0].name  %}
+        <li><a><i class="fa fa-cubes"></i> Cores <span class="fa fa-chevron-down"></span></a>
+          <ul class="nav child_menu">
+            <li><a href="/departments">Department</a></li>
+            <li><a href="/batches">Batch</a></li>
+            <li><a href="/semesters">Semester</a></li>
+            <li><a href="/users">User</a></li>
+            <li><a href="/student/students">Student</a></li>
+            <li><a href="/student/ranks">Rank</a></li>
+            <li><a href="/student/charge_tables">Charge Table</a></li>
+          </ul>
+        </li>
+        {% endif %}
       </ul>
     </div>
     <div class="menu_section">
