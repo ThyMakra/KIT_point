@@ -24,11 +24,11 @@ class ProductionConfig(Config):
 
     # PostgreSQL database
     SQLALCHEMY_DATABASE_URI = 'postgresql://{}:{}@{}:{}/{}'.format(
-        environ.get('GENTELELLA_DATABASE_USER', 'gentelella'),
-        environ.get('GENTELELLA_DATABASE_PASSWORD', 'gentelella'),
-        environ.get('GENTELELLA_DATABASE_HOST', 'db'),
+        environ.get('GENTELELLA_DATABASE_USER', 'postgres'),
+        environ.get('GENTELELLA_DATABASE_PASSWORD', 'postgres'),
+        environ.get('GENTELELLA_DATABASE_HOST', 'localhost'),
         environ.get('GENTELELLA_DATABASE_PORT', 5432),
-        environ.get('GENTELELLA_DATABASE_NAME', 'gentelella')
+        environ.get('GENTELELLA_DATABASE_NAME', 'flask')
     )
 
 
