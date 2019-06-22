@@ -46,40 +46,29 @@
               <form id="demo-form" data-parsley-validate action="{{ url_for('student_blueprint.create_student') }}"
                     method="post">
                 {% for field in student_form if field.widget.input_type != 'hidden' %}
-                  {% if field.label.text == "Name" %}
-                    <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
-                      <label>{{ field.label.text }}</label>
-                      {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+
+                  <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
+                    <label>{{ field.label.text }}</label>
+                    {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                    {% if field.label.text == "Name" %}
                       <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
-                    </div>
-                  {% elif field.label.text == "Roll Number" %}
-                    <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
-                      <label>{{ field.label.text }}</label>
-                      {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
-                      <span class="fa fa-envelope form-control-feedback left" aria-hidden="true"></span>
-                    </div>
-                  {% elif field.label.text == "Gender" %}
-                    <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
-                      <label>{{ field.label.text }}</label>
-                      {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
-                      <span class="fa fa-share form-control-feedback left" aria-hidden="true"></span>
-                    </div>
-                  {% else %}
-                    <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
-                      <label>{{ field.label.text }}</label>
-                      {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                    {% elif field.label.text == "Roll Number" %}
+                      <span class="fa fa-envelope-o form-control-feedback left" aria-hidden="true"></span>
+                    {% elif field.label.text == "Gender" %}
+                      <span class="fa fa-venus-mars form-control-feedback left" aria-hidden="true"></span>
+                    {% elif field.label.text == 'User' %}
                       <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
-                    </div>
-                  {% endif %}
+                    {% elif field.label.text == 'Department' %}
+                      <span class="fa fa-building-o form-control-feedback left" aria-hidden="true"></span>
+                    {% elif field.label.text == 'Batch' %}
+                      <span class="fa fa-sitemap form-control-feedback left" aria-hidden="true"></span>
+                    {% else %}
+                      <span class="fa fa-star form-control-feedback left" aria-hidden="true"></span>
+                    {% endif %}
+                  </div>
 
                 {% endfor %}
 
-                {#                <label>Gender *:</label>#}
-                {#                <p>#}
-                {#                  M:#}
-                {#                  <input type="radio" class="flat" name="gender" id="genderM" value="M" checked="" required/> F:#}
-                {#                  <input type="radio" class="flat" name="gender" id="genderF" value="F"/>#}
-                {#                </p>#}
                 <div class="text-center">
                   <button type="submit" class="btn btn-primary">Add new student</button>
                 </div>

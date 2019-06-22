@@ -22,7 +22,7 @@ def get_ranks():
 
 
 class CreateStudentForm(FlaskForm):
-    name = StringField('Name', id='student_name', _name="name")
+    name = StringField('Name', id='name', _name="name")
     roll_number = StringField('Roll Number', _name="roll_number")
     gender = SelectField('Gender', choices=[('M', 'Male'), ('F', 'Female')], _name="gender", id='gender')
     user = QuerySelectField('User', query_factory=get_all_users, allow_blank=True, _name="user", id='user')
@@ -32,14 +32,14 @@ class CreateStudentForm(FlaskForm):
                                   id='department')
     batch = SelectField('Batch', choices=[], id='batch')
     rank = QuerySelectField('Rank', query_factory=get_ranks, allow_blank=True, id='rank')
-    
-    
+
+
 class CreateRankForm(FlaskForm):
     name = StringField('Name', id='name')
     code = StringField('Code', id='code')
     description = StringField('Description', id='description')
-    
-    
+
+
 class CreateChargeTableForm(FlaskForm):
     price = FloatField('Price', id='price')
     department = QuerySelectField('Department',

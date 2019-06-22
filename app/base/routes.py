@@ -75,10 +75,10 @@ def create_user():
     else:
         print('noooooooooooooooooo')
     if check_email is None and check_username is None:
-        # role = db.session.query(Role).get(2)
+        role = db.session.query(Role).get(2)
         user = User(**request.form)
-        user.roles.append(Role('ADMIN'))
-        # user.roles.append(role)
+        # user.roles.append(Role('ADMIN'))
+        user.roles.append(role)
         db.session.add(user)
         db.session.commit()
         return jsonify('success')

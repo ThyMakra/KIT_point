@@ -45,52 +45,31 @@
               <!-- start form for validation -->
               <form id="demo-form" data-parsley-validate method="post">
                 {% for field in form if field.widget.input_type != 'hidden' %}
-                  {% if field.label.text == "Name" %}
-                    <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
-                      <label>{{ field.label.text }}</label>
-                      {{ field(class="form-control has-feedback-left required", placeholder=field.label.text,
-                        value=student.name) }}
+
+                  <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
+                    <label>{{ field.label.text }}</label>
+                    {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                    {% if field.label.text == "Name" %}
                       <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
-                    </div>
-                  {% elif field.label.text == "Roll Number" %}
-                    <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
-                      <label>{{ field.label.text }}</label>
-                      {{ field(class="form-control has-feedback-left required", placeholder=field.label.text,
-                        value=student.roll_number) }}
-                      <span class="fa fa-envelope form-control-feedback left" aria-hidden="true"></span>
-                    </div>
-                  {% elif field.label.text == "Gender" %}
-                    <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
-                      <label>{{ field.label.text }}</label>
-                      {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
-                      <span class="fa fa-share form-control-feedback right" aria-hidden="true"></span>
-                    </div>
-                  {% elif field.label.text == 'User' %}
-                    <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
-                      <label>{{ field.label.text}}</label>
-                      {{ field(class="form-control has-feedback-left required", placeholder=field.label.text,
-                        value=student.user.id) }}
-                      <span class="fa fa-user form-control-feedback right" aria-hidden="true"></span>
-                    </div>
-                  {% elif field.label.text == 'Department' %}
-                    <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
-                      <label>{{ field.label.text }}</label>
-                      {{ field(class="form-control has-feedback-left required", placeholder=field.label.text,
-                        value=student.department.id) }}
-                      <span class="fa fa-user form-control-feedback right" aria-hidden="true"></span>
-                    </div>
-                  {% else %}
-                    <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
-                      <label>{{ field.label.text }}</label>
-                      {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
-                      <span class="fa fa-user form-control-feedback right" aria-hidden="true"></span>
-                    </div>
-                  {% endif %}
+                    {% elif field.label.text == "Roll Number" %}
+                      <span class="fa fa-envelope-o form-control-feedback left" aria-hidden="true"></span>
+                    {% elif field.label.text == "Gender" %}
+                      <span class="fa fa-venus-mars form-control-feedback left" aria-hidden="true"></span>
+                    {% elif field.label.text == 'User' %}
+                      <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+                    {% elif field.label.text == 'Department' %}
+                      <span class="fa fa-building-o form-control-feedback left" aria-hidden="true"></span>
+                    {% elif field.label.text == 'Batch' %}
+                      <span class="fa fa-sitemap form-control-feedback left" aria-hidden="true"></span>
+                    {% else %}
+                      <span class="fa fa-star form-control-feedback left" aria-hidden="true"></span>
+                    {% endif %}
+                  </div>
 
                 {% endfor %}
-              <div class="text-center">
-                <button type="submit" class="btn btn-primary">Update student info</button>
-              </div>
+                <div class="text-center">
+                  <button type="submit" class="btn btn-primary">Update student info</button>
+                </div>
 
               </form>
               <!-- end form for validations -->
@@ -108,29 +87,32 @@
   <script src="{{ url_for('static', filename='vendors/parsleyjs/dist/parsley.min.js') }}"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      let $department = $('#department_id');
-      let $batch = $('#batch_id');
+      let $department = $('#department');
+      let $batch = $('#batch');
       $department.val({{ student.department.id }});
       $.getJSON('get_batch/' + {{ student.department.id }}, function(res) {
-          if (res['code'] === 200) {
-            $batch.html('');
-            let empty = '<option></optoin>';
-            $batch.append(empty);
-            Object.keys(res).forEach((v, i, arr) => {
-              if (i !== arr.length - 1)
-                $batch.append('<option value=' + v + '>' + res[v].name + '</option>');
-            });
-            $batch.val({{ student.batch.id }});
-          } else {
-            let error = '<ul class="alert alert-danger">' +
-                          '<label>Cannot get batches</label>' +
-                        '</ul>';
-            $('#alert_message').append(error);
-          }
-        });
-      $('#user_id').val({{ student.user.id }});
-      $('#gender_id').val('{{ student.gender }}');
-      $('#rank_id').val({{ student.rank.id }});
+        if (res['code'] === 200) {
+          $batch.html('');
+          let empty = '<option></optoin>';
+          $batch.append(empty);
+          Object.keys(res).forEach((v, i, arr) => {
+            if (i !== arr.length - 1) {
+              $batch.append('<option value=' + v + '>' + res[v].name + '</option>');
+            }
+          });
+          $batch.val({{ student.batch.id }});
+        } else {
+          let error = '<ul class="alert alert-danger">' +
+            '<label>Cannot get batches</label>' +
+            '</ul>';
+          $('#alert_message').append(error);
+        }
+      });
+      $('#name').val('{{ student.name }}');
+      $('#roll_number').val('{{ student.roll_number }}');
+      $('#user').val({{ student.user.id }});
+      $('#gender').val('{{ student.gender }}');
+      $('#rank').val({{ student.rank.id }});
       $department.on('change', function() {
         let dep_id = $(this).val();
         let length = $(this).text();
@@ -151,8 +133,8 @@
             });
           } else {
             let error = '<ul class="alert alert-danger">' +
-                          '<label>Cannot get batches</label>' +
-                        '</ul>';
+              '<label>Cannot get batches</label>' +
+              '</ul>';
             $('#alert_message').append(error);
           }
         });

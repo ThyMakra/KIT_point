@@ -19,7 +19,7 @@ class CreateAccountForm(FlaskForm):
 
 
 class CreateDepartmentForm(FlaskForm):
-    name = StringField('Department Name', _name='name')
+    name = StringField('Department', _name='name')
     code = StringField('Code', _name='code')
 
 

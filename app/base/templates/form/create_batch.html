@@ -50,27 +50,33 @@
                     <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
                       <div class="control-group">
                         <div class="controls">
-                            <label>{{ field.label.text }}</label>
-                            {{ field(class="form-control has-feedback-left required single_cal1", placeholder=field.label.text) }}
-                            <span class="fa fa-calendar-o form-control-feedback left" aria-hidden="true"></span>
-                            <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                          <label>{{ field.label.text }}</label>
+                          {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                          <span class="fa fa-calendar-o form-control-feedback left" aria-hidden="true"></span>
+                          <span id="inputSuccess2Status" class="sr-only">(success)</span>
                         </div>
                       </div>
 
                     </div>
-                    {% else %}
+                  {% else %}
                     <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
                       <label>{{ field.label.text }}</label>
                       {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
-                      <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+                      {% if field.label.text == 'Batch' %}
+                        <span class="fa fa-sitemap form-control-feedback left" aria-hidden="true"></span>
+                      {% elif field.label.text == 'Department' %}
+                        <span class="fa fa-building-o form-control-feedback left" aria-hidden="true"></span>
+                      {% else %}
+                        <span class="fa fa-code form-control-feedback left" aria-hidden="true"></span>
+                      {% endif %}
                     </div>
                   {% endif %}
                 {% endfor %}
-              <div class="col-sm-12">
-                <div class="text-center">
-                  <button type="submit" class="btn btn-primary">Add new batch</button>
+                <div class="col-sm-12">
+                  <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Add new batch</button>
+                  </div>
                 </div>
-              </div>
               </form>
               <!-- end form for validations -->
 

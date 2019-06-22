@@ -48,7 +48,13 @@
                     <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
                       <label>{{ field.label.text }}</label>
                       {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
-                      <span class="fa fa-user form-control-feedback right" aria-hidden="true"></span>
+                      {% if field.label.text == 'Name' %}
+                        <span class="fa fa-pencil-square form-control-feedback left" aria-hidden="true"></span>
+                      {% elif field.label.text == 'Code' %}
+                        <span class="fa fa-code form-control-feedback left" aria-hidden="true"></span>
+                      {% else %}
+                        <span class="fa fa-book form-control-feedback left" aria-hidden="true"></span>
+                      {% endif %}
                     </div>
                 {% endfor %}
                 <div class="text-center">
