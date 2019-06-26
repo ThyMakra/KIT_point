@@ -33,7 +33,7 @@ def route_errors(error):
 @login_required
 def get_all_charge_tables():
     charge_tables = db.session.query(ChargeTable).all()
-    return render_template('charge_table.html', charge_tables=charge_tables)
+    return render_template('stakeholder.html', charge_tables=charge_tables)
 
 
 @blueprint.route('charge_table/<charge_id>', methods=['GET', 'POST'])
@@ -42,7 +42,7 @@ def update_charge_table(charge_id):
     form = CreateChargeTableForm(request.form)
     charge_table = ChargeTable.query.filter_by(id=charge_id).first()
     if request.method == 'GET':
-        return render_template('/update_charge_table.html', form=form, charge_table=charge_table)
+        return render_template('/update_stakeholder.html', form=form, charge_table=charge_table)
     else:
         price = request.form['price']
         charge_table.price = price
@@ -58,7 +58,7 @@ def update_charge_table(charge_id):
 def create_charge_table():
     if request.method == 'GET':
         form = CreateChargeTableForm(request.form)
-        return render_template('create_charge_table.html', form=form)
+        return render_template('create_stakeholder.html', form=form)
     price = request.form['price']
     department = request.form['department']
     batch = request.form['batch']
@@ -77,14 +77,14 @@ def create_charge_table():
     else:
         form = CreateChargeTableForm(request.form)
         error = 'Duplicate entry'
-        return render_template('create_charge_table.html', error=error, form=form)
+        return render_template('create_stakeholder.html', error=error, form=form)
 
 
 @blueprint.route('/ranks')
 @login_required
 def get_all_ranks():
     ranks = db.session.query(Rank).all()
-    return render_template('rank.html', ranks=ranks)
+    return render_template('specialty.html', ranks=ranks)
 
 
 @blueprint.route('/rank/delete<rank_id>')
@@ -108,7 +108,7 @@ def update_rank(rank_id):
     form = CreateRankForm(request.form)
     rank = Rank.query.filter_by(id=rank_id).first()
     if request.method == 'GET':
-        return render_template('/update_rank.html', form=form, rank=rank)
+        return render_template('/update_specialty.html', form=form, rank=rank)
     else:
         name = request.form['name']
         code = request.form['code']
@@ -128,7 +128,7 @@ def update_rank(rank_id):
 def create_rank():
     if request.method == 'GET':
         rank_form = CreateRankForm(request.form)
-        return render_template('create_rank.html', rank_form=rank_form)
+        return render_template('create_specialty.html', rank_form=rank_form)
     name = request.form['name']
     code = request.form['code']
     description = request.form['description']
@@ -144,7 +144,7 @@ def create_rank():
     else:
         rank_form = CreateRankForm(request.form)
         error = 'Duplicate entry'
-        return render_template('create_rank.html', error=error, rank_form=rank_form)
+        return render_template('create_specialty.html', error=error, rank_form=rank_form)
 
 
 @blueprint.route('/students')
@@ -230,7 +230,7 @@ def create_student():
         flash('New student created')
         return redirect(url_for('student_blueprint.create_student'))
     else:
-        
+
         if check_name is None:
             error = "Duplicate roll number!"
         elif check_roll is None:
@@ -269,7 +269,7 @@ def update_student(student_id):
     db.session.commit()
     flash('Student updated')
     return redirect('students')
-    
+
 
 ## Errors
 @blueprint.errorhandler(403)
