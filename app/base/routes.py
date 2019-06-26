@@ -75,7 +75,11 @@ def create_user():
     else:
         print('noooooooooooooooooo')
     if check_email is None and check_username is None:
+<<<<<<< HEAD
         role = db.session.query(Role).get(2)
+=======
+        role = db.session.query(Role).get(1)
+>>>>>>> created an account
         user = User(**request.form)
         # user.roles.append(Role('ADMIN'))
         user.roles.append(role)

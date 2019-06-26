@@ -20,21 +20,32 @@ class User(db.Model, UserMixin):
     # Define the relationship to Role via UserRoles
     roles = db.relationship('Role', secondary=UserRoles, lazy='subquery', backref=db.backref('users', lazy=True))
     students = db.relationship('Student', backref='user', lazy=True)
+<<<<<<< HEAD
     stakeholders = db.relationship('Stakeholder', backref='user', lazy=True)
+=======
+>>>>>>> created an account
 
     def __init__(self, **kwargs):
         for property, value in kwargs.items():
             # depending on whether value is an iterable or not, we must
             # unpack it's value (when **kwargs is request.form, some values
             # will be a 1-element list)
+<<<<<<< HEAD
 
+=======
+      
+>>>>>>> created an account
             if hasattr(value, '__iter__') and not isinstance(value, str):
                 # the ,= unpack of a singleton fails PEP8 (travis flake8 test)
                 value = value[0]
             if property == 'password':
                 value = hashpw(value.encode('utf8'), gensalt())
             setattr(self, property, value)
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> created an account
     def __repr__(self):
       return str(self.username)
 
@@ -44,7 +55,11 @@ class Role(db.Model):
     # __tablename__ = 'roles'
     id = Column(db.Integer, primary_key=True)
     name = Column(db.String(50), unique=True)
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> created an account
     def __init__(self, name):
         self.name = name
 
@@ -71,12 +86,20 @@ class Department(db.Model):
     students = db.relationship('Student', backref='department', lazy=True)
     semesters = db.relationship('Semester', backref='department', lazy=True)
     chargeTables = db.relationship('ChargeTable', backref='department', lazy=True)
+<<<<<<< HEAD
     stakeholders = db.relationship('Stakeholder', backref='department', lazy=True)
 
     def __init__(self, name, code):
         self.name = name
         self.code = code
 
+=======
+  
+    def __init__(self, name, code):
+        self.name = name
+        self.code = code
+  
+>>>>>>> created an account
     def __repr__(self):
         return str(self.name)
 
@@ -93,14 +116,22 @@ class Batch(db.Model):
     students = db.relationship('Student', backref='batch', lazy=True)
     semesters = db.relationship('Semester', backref='batch', lazy=True)
     chargeTables = db.relationship('ChargeTable', backref='batch', lazy=True)
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> created an account
     def __init__(self, name, code, start_date, end_date, department_id):
         self.name = name
         self.code = code
         self.start_date = start_date
         self.end_date = end_date
         self.department_id = department_id
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> created an account
     def __repr__(self):
         return str(self.name)
 
@@ -124,6 +155,10 @@ class Semester(db.Model):
         self.end_date = end_date
         self.batch_id = batch_id
         self.department_id = department_id
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> created an account
     def __repr__(self):
         return str(self.name)

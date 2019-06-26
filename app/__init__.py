@@ -15,8 +15,12 @@ def register_extensions(app):
 
 
 def register_blueprints(app):
+<<<<<<< HEAD
     for module_name in ('base', 'forms', 'ui', 'home', 'tables', 'data', 'additional', 'base', 'student',
                         'stakeholder'):
+=======
+    for module_name in ('base', 'forms', 'ui', 'home', 'tables', 'data', 'additional', 'base', 'student'):
+>>>>>>> created an account
         module = import_module('app.{}.routes'.format(module_name))
         app.register_blueprint(module.blueprint)
 
