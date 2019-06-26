@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float
 from app import db
-
+#hello world
 
 class Student(db.Model):
     __tablename__ = 'student'
