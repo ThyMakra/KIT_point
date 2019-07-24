@@ -1,0 +1,132 @@
+{% extends "base_site.html" %}
+
+{% block content %}
+  <div class="right_col" role="main">
+    <div class="">
+      <div class="row">
+        <div class="col-md-6 col-xs-12">
+          {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              <ul class="alert alert-success">
+                {% for message in messages %}
+                  <label>{{ message }}</label>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          {% endwith %}
+          {% if error %}
+            <p class="alert alert-error"><strong>Error:</strong> {{ error }}</p>
+          {% endif %}
+          <div class="x_panel">
+            <div class="x_title">
+              <h2>Registration Form
+                <small>Click to validate</small>
+              </h2>
+              <ul class="nav navbar-right panel_toolbox">
+                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                <li><a href="/semesters"><i class="fa fa-list-alt"></i></a></li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i
+                    class="fa fa-wrench"></i></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="#">Settings 1</a>
+                    </li>
+                    <li><a href="#">Settings 2</a>
+                    </li>
+                  </ul>
+                </li>
+                <li><a class="close-link"><i class="fa fa-close"></i></a>
+                </li>
+              </ul>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+
+              <!-- start form for validation -->
+              <form id="demo-form" data-parsley-validate action="{{ url_for('base_blueprint.create_semester') }}"
+                    method="post">
+                {% for field in semesterForm if field.widget.input_type != 'hidden' %}
+                  {% if field.label.text == 'Start Date' or field.label.text == 'End Date' %}
+                    <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
+                      <div class="control-group">
+                        <div class="controls">
+                          <label>{{ field.label.text }}</label>
+                          {{ field(class="form-control has-feedback-left required custom-date-picker", placeholder=field.label.text) }}
+                          <span class="fa fa-calendar-o form-control-feedback left" aria-hidden="true"></span>
+                          <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                        </div>
+                      </div>
+
+                    </div>
+                  {% else %}
+                    <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
+                      <label>{{ field.label.text }}</label>
+                      {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                      {% if field.label.text == 'Batch' %}
+                        <span class="fa fa-sitemap form-control-feedback left" aria-hidden="true"></span>
+                      {% elif field.label.text == 'Department' %}
+                        <span class="fa fa-building-o form-control-feedback left" aria-hidden="true"></span>
+                      {% elif field.label.text == 'Semester' %}
+                        <span class="fa fa-map form-control-feedback left" aria-hidden="true"></span>
+                      {% else %}
+                        <span class="fa fa-code form-control-feedback left" aria-hidden="true"></span>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+                <div class="text-center">
+                  <button type="submit" class="btn btn-primary">Add new semester</button>
+                </div>
+
+              </form>
+              <!-- end form for validations -->
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+{% block javascripts %}
+  {{ super() }}
+  {#  <!-- Parsley -->#}
+  <script src="{{ url_for('static', filename='vendors/parsleyjs/dist/parsley.min.js') }}"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      let $batch = $('#batch');
+      $('#department').on('change', function() {
+        let dep_id = $(this).val();
+        let length = $(this).text();
+        if (length === '') return;
+        $.getJSON('/student/get_batch/' + dep_id, function(res) {
+          if (res['code'] === 200) {
+            $batch.html('');
+            let empty = '<option></optoin>';
+            $batch.append(empty);
+            Object.keys(res).forEach((v, i, arr) => {
+              console.debug(res[v]);
+              if (i !== arr.length - 1) {
+                let option = '<option value=' + v + '>' +
+                  res[v].name +
+                  '</option>';
+                $batch.append(option);
+              }
+
+            });
+          } else {
+            let error = '<ul class="alert alert-danger">' +
+              '<label>Cannot get batches</label>' +
+              '</ul>';
+            $('#alert_message').append(error);
+          }
+        });
+      });
+       $('.custom-date-picker').daterangepicker({
+          singleDatePicker: true,
+          singleClasses: "picker_4"
+        });
+    });
+  </script>
+{% endblock javascripts %}
+

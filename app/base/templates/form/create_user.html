@@ -1,0 +1,136 @@
+{% extends "base_site.html" %}
+
+
+{% block content %}
+  <div class="right_col" role="main">
+    <div class="">
+      <div class="row">
+        <div class="col-md-6 col-xs-12">
+          {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              <ul class="alert alert-success" id="alert_message">
+                {% for message in messages %}
+                  <label>{{ message }}</label>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          {% endwith %}
+          {% if error %}
+            <p class="alert alert-error"><strong>Error:</strong> {{ error }}
+          {% endif %}
+          <div class="x_panel">
+            <div class="x_title">
+              <h2>Registration Form
+                <small>Click to validate</small>
+              </h2>
+              <ul class="nav navbar-right panel_toolbox">
+                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                <li><a href="/users" id="go-to-list"><i class="fa fa-list-alt"></i></a></li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i
+                    class="fa fa-wrench"></i></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="#" data-toggle="modal" data-target=".bs-example-modal-sm">Add role</a>
+                    </li>
+                    <li><a href="#">Settings 2</a>
+                    </li>
+                  </ul>
+                </li>
+                <li><a class="close-link"><i class="fa fa-close"></i></a>
+                </li>
+              </ul>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+
+              <!-- start form for validation -->
+              <form id="create-user-form" data-parsley-validate method="post">
+                {% for field in userForm if field.widget.input_type != 'hidden' %}
+                  <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
+                    <label>{{ field.label.text }}</label>
+                    {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                    {% if field.label.text == 'Username' %}
+                      <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+                    {% elif field.label.text == 'Email' %}
+                      <span class="fa fa-envelope-o form-control-feedback left" aria-hidden="true"></span>
+                    {% else %}
+                      <span class="fa fa-lock form-control-feedback left" aria-hidden="true"></span>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+                <div class="col-sm-12">
+                  <div class="text-center">
+                    <button type="button" onclick="signup()" class="btn btn-primary">Add new user</button>
+                  </div>
+                </div>
+              </form>
+              <!-- end form for validations -->
+
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                  aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel2">Create new role</h4>
+              </div>
+              <div class="modal-body">
+                <form method="post" id="role-form" data-parsley-validate action="{{ url_for('base_blueprint.create_role') }}">
+                <div class="form-group has-feedback">
+                  {% for field in roleForm if field.widget.input_type != 'hidden'%}
+                    {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                    <span class="fa fa-pencil-square-o form-control-feedback left" aria-hidden="true"></span>
+                  {% endfor %}
+                </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" form="role-form">Save changes</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+{% block javascripts %}
+  {{ super() }}
+    <!-- Parsley -->
+  <script src="{{ url_for('static', filename='vendors/parsleyjs/dist/parsley.min.js') }}"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      setTimeout(function() {
+        $('#alert_message').hide();
+      }, 1500);
+    });
+    function signup() { // eslint-disable-line no-unused-vars
+      if ($('#create-user-form').parsley().validate()) {
+        $.ajax({
+          type: 'POST',
+          url: '/create_user',
+          dataType: 'json',
+          data: $('#create-user-form').serialize(),
+          success: function(result) {
+            if (result === 'duplicate') {
+              const message = 'Cannot create new user: duplicate entry.';
+              alertify.notify(message, 'error', 5);
+            } else {
+              alertify.notify('New user created.', 'success', 5);
+              document.getElementById('go-to-list').click();
+            }
+          },
+        });
+      }
+    }
+  </script>
+{% endblock javascripts %}
+

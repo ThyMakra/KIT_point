@@ -1,0 +1,363 @@
+{% extends "base_site.html" %}
+
+{% block title %} Project {% endblock title %}
+
+{% block stylesheets %}
+  {{ super() }}
+  <link href="{{ url_for('static', filename='vendors/datatables.net-bs/css/dataTables.bootstrap.min.css') }}"
+        rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css') }}"
+        rel="stylesheet">
+  <link
+    href="{{ url_for('static', filename='vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css') }}"
+    rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css') }}"
+        rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendors/datatables.net-scroller-bs/css/scroller.bootstrap.min.css') }}"
+        rel="stylesheet">
+{% endblock stylesheets %}
+
+
+{% block content %}
+  <div class="right_col" role="main">
+    <div class="clearfix"></div>
+
+
+    <div class="row">
+      <div class="col-md-12 col-sm-12 col-xs-12">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              {% if 'error' in message %}
+                <ul class="alert alert-danger" id="alert_message">
+                  <label>{{ message }}</label>
+                </ul>
+              {% else %}
+                <ul class="alert alert-success" id="alert_message">
+                  <label>{{ message }}</label>
+                </ul>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        {% if error %}
+          <p class="alert alert-error"><strong>Error:</strong> {{ error }}</p>
+        {% endif %}
+        <div class="x_panel">
+          <div class="x_title">
+            <h2>KIT Projects</h2>
+            <ul class="nav navbar-right panel_toolbox">
+              <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+              </li>
+              <li><a href="/project/create"><i class="fa fa-plus-circle"></i></a></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i
+                  class="fa fa-wrench"></i></a>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a href="#">Settings 1</a>
+                  </li>
+                  <li><a href="#">Settings 2</a>
+                  </li>
+                </ul>
+              </li>
+              <li><a class="close-link"><i class="fa fa-close"></i></a>
+              </li>
+            </ul>
+            <div class="clearfix"></div>
+          </div>
+          <div class="x_content">
+            <div class="" role="tabpanel" data-example-id="togglable-tabs">
+              <ul id="project-status-tap-ul" class="nav nav-tabs bar_tabs" role="tablist">
+                <li id="ignore" role="presentation">
+                  <select class="form-control" name="company" id="company">
+                    <option value="">Companies</option>
+                    <option value="Dexpertize">Dexpertize</option>
+                    <option value="Keen">Keen</option>
+                    <option value="Chain">Chain</option>
+                    <option value="Earlyphant">Earlyphant</option>
+                    <option value="Escott">Escott</option>
+                    <option value="DGK">DGK</option>
+                  </select>
+                </li>
+                <li id="all" role="presentation" class="">
+                  <a href="#tab_content1" class="project-status-tap" role="tab"
+                     data-toggle="tab" aria-expanded="true" onclick="saveValue(this)"
+                     name="all">All</a>
+                </li>
+                <li id="project-to-approve" role="presentation" class="">
+                  <a href="#tab_content1" role="tab" class="project-status-tap"
+                     data-toggle="tab" aria-expanded="false" onclick="saveValue(this)"
+                     name="project-to-approve">Project to approve</a>
+                </li>
+                <li id="unapproved-project" role="presentation" class="">
+                  <a href="#tab_content1" role="tab" class="project-status-tap"
+                     data-toggle="tab" aria-expanded="false" onclick="saveValue(this)"
+                     name="unapproved-project">Unapproved project</a>
+                </li>
+                <li id="in-progress" role="presentation" class="">
+                  <a href="#tab_content1" class="project-status-tap" role="tab"
+                     data-toggle="tab" aria-expanded="true" onclick="saveValue(this)"
+                     name="in-progress">In Progress</a>
+                </li>
+                <li id="complete" role="presentation" class="">
+                  <a href="#tab_content1" role="tab" class="project-status-tap"
+                     data-toggle="tab" aria-expanded="false" onclick="saveValue(this)"
+                     name="complete">Complete</a>
+                </li>
+                <li id="point-to-approve" role="presentation" class="">
+                  <a href="#tab_content1" role="tab" class="project-status-tap"
+                     data-toggle="tab" aria-expanded="false" onclick="saveValue(this)"
+                     name="point-to-approve">Point to approve</a>
+                </li>
+                <li id="approved" role="presentation" class="">
+                  <a href="#tab_content1" role="tab" class="project-status-tap"
+                     data-toggle="tab" aria-expanded="false" onclick="saveValue(this)"
+                     name="approved">Approved</a>
+                </li>
+              </ul>
+              <div id="myTabContent" class="tab-content">
+                <div role="tabpanel" class="tab-pane fade active in" id="tab_content1" aria-labelledby="home-tab">
+
+                  <table id="datatable-responsive"
+                         class="table table-striped table-bordered table-hover dt-responsive nowrap" cellspacing="0"
+                         width="100%">
+                    <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Status</th>
+                      <th>Company</th>
+                      <th>Estimate</th>
+                      <th>Actual</th>
+                      <th>Propose</th>
+                      <th>Acquire</th>
+                      <th>Start Date</th>
+                      <th>Deadline</th>
+                      <th>End date</th>
+                      <th>Next action</th>
+                      <th>Edit</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for project in projects %}
+                      <tr>
+                        <td>{{ project.name }}</td>
+                        <td>{{ project.status }}</td>
+                        <td>{{ project.company}}</td>
+                        <td>{{ project.estimate_point }}</td>
+                        <td>{{ project.actual_point }}</td>
+                        <td>
+                          {% if current_user.roles[0].name == 'ADMIN' and project.status.name=='Complete' %}
+                             {% if project.propose_point != 0 %}
+                               {{ project.propose_point }}
+                             {% else %}
+                               <input id="propose{{ project.id }}" class="text-center" type="text" style="width: 5em;" placeholder="0.00">
+                             {% endif %}
+                          {% else %}
+                            {{ project.propose_point }}
+                          {% endif %}
+                        </td>
+                        <td>
+                          {% if current_user.roles[0].name == 'ADMIN' and project.status.name=='Point to approve' %}
+                            {% if project.acquire_point != 0 %}
+                               {{ project.acquire_point }}
+                             {% else %}
+                               <input id="acquire{{ project.id }}" class="text-center" type="text" style="width: 5em;" placeholder="0.00">
+                             {% endif %}
+                          {% else %}
+                            {{ project.acquire_point }}
+                          {% endif %}
+                        </td>
+                        <td>{{ project.start_date }}</td>
+                        <td>{{ project.deadline }}</td>
+                        <td>
+                          {% if project.end_date != None %}
+                            {{ project.end_date }}
+                          {% else %}
+                            <p></p>
+                          {% endif %}
+                        </td>
+                        <td>
+                          {% if project.status.name == "In Progress" and current_user.roles[0].name == 'ADMIN'%}
+                            <a class="btn btn-success btn-xs" href="#"
+                               onclick="update_project('{{ project.id }}', 'complete')">Complete</a>
+                          {% elif project.status.name == 'Complete' and current_user.roles[0].name == 'ADMIN'%}
+                            <a class="btn btn-info btn-xs" href="#"
+                               onclick="update_project('{{ project.id }}', 'request-point')">Request point</a>
+                          {% elif project.status.name == 'Point to approve' and current_user.roles[0].name == 'ADMIN'%}
+                            <a class="btn btn-primary btn-xs" href="#"
+                               onclick="update_project('{{ project.id }}', 'yes')">Yes</a>
+                            <a class="btn btn-danger btn-xs" href="#">No</a>
+                          {% elif project.status.name == 'Project to approve' and current_user.roles[0].name == 'ADMIN'%}
+                            <a class="btn btn-primary btn-xs" href="#">Yes</a>
+                            <a class="btn btn-danger btn-xs" href="#">No</a>
+                          {% else %}
+                            <p></p>
+                          {% endif %}
+                        </td>
+                        <td>
+                          <a href="#" class="btn btn-primary btn-xs"><i class="fa fa-folder"></i> View </a>
+                          {% if current_user.roles[0].name == 'ADMIN' or current_user.roles[0].name == 'USER' %}
+                            <a href="/project/{{ project.id }}" class="btn btn-info btn-xs"><i class="fa fa-pencil"></i>
+                              Edit </a>
+                          {% endif %}
+                          {% if project.status.name == "In Progress" or project.status.name == "Project to approve" %}
+                            {% if current_user.roles[0].name == 'ADMIN' %}
+                              <a href="/project/delete{{ project.id }}" class="btn btn-danger btn-xs"><i
+                                class="fa fa-trash-o"></i> Delete </a>
+                            {% endif %}
+                          {% endif %}
+
+                        </td>
+                      </tr>
+                    {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+
+{% block javascripts %}
+  {{ super() }}
+  <!-- PNotify -->
+  <script src="{{ url_for('static', filename='vendors/pnotify/dist/pnotify.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/pnotify/dist/pnotify.buttons.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/pnotify/dist/pnotify.nonblock.js') }}"></script>
+  <!-- Datatables -->
+  <script src="{{ url_for('static', filename='vendors/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-buttons/js/dataTables.buttons.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-buttons-bs/js/buttons.bootstrap.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/datatables.net-buttons/js/buttons.flash.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/datatables.net-buttons/js/buttons.html5.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/datatables.net-buttons/js/buttons.print.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-keytable/js/dataTables.keyTable.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-responsive/js/dataTables.responsive.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-responsive-bs/js/responsive.bootstrap.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-scroller/js/dataTables.scroller.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/jszip/dist/jszip.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/pdfmake/build/pdfmake.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/pdfmake/build/vfs_fonts.js') }}"></script>
+  <script>
+    $(document).ready(function() {
+      setTimeout(function() {
+        $('#alert_message').hide();
+      }, 1500);
+
+      $('.project-status-tap').on('click', function() {
+        let status = $(this).text();
+        if (status==='All') status = '';
+        let table = $('#datatable-responsive').DataTable();
+        table
+          .column(1)
+          .search(status)
+          .draw();
+      });
+    });
+
+    let load = function() {
+      let status = 'In progress';
+      if (sessionStorage.getItem('active')==='all') {
+            status = '';
+      }else if (sessionStorage.getItem('active')==='complete'){
+        status = 'Complete'
+      }else if (sessionStorage.getItem('active')==='approved'){
+        status = 'Approved'
+      }else if (sessionStorage.getItem('active')==='project-to-approve'){
+        status = 'Project to approve'
+      }else if (sessionStorage.getItem('active')==='unapproved-project'){
+        status = 'Unapproved project'
+      }else if (sessionStorage.getItem('active')==='point-to-approve'){
+        status = 'Point to approve'
+      }
+      let table = $('#datatable-responsive').DataTable();
+      table
+        .column(1)
+        .search(status)
+        .draw();
+    };
+    function update_project(project_id, state){
+      let message = '';
+      let status = 0;
+      let point = 0;
+      if(state==='complete'){
+       status = 2;
+       message = 'Project completed.'
+      }
+      else if (state==='request-point') {
+        message = 'Propose point generated.';
+        point = $('#propose'+project_id).val();
+        status = 4;
+      }
+      else if (state==='yes'){
+        message = 'Acquire point generated.';
+        point = $('#acquire'+project_id).val();
+        status = 5;
+      }
+     $.ajax({
+        url: '/project/update_project',
+        Type: 'GET',
+        data: {
+          id: project_id,
+          status: status,
+          point: point
+        },
+        dataType: 'Json',
+        success:function(res) {
+            if(res==='success'){
+              alertify.notify(message, 'success', 5);
+              setTimeout(function() {
+                window.location.reload()
+              }, 2000);
+            }
+          }
+      })
+    }
+    //Save the value function - save it to sessionStorage as (ID, VALUE)
+    function saveValue(e){
+
+        let id = 'active';
+        let val = e.name; // get the value.
+        sessionStorage.setItem(id,val);// Every time user writing something, the sessionStorage's value will override .
+    }
+
+    //get the saved value function - return the value of "v" from sessionStorage.
+    function getSavedValue  (v){
+        if (!sessionStorage.getItem(v)) {
+            return "";// You can change this to your defualt value.
+        }
+        return sessionStorage.getItem(v);
+    }
+    // to update active class of project status tap //
+    let tap_id = 'in-progress';
+    if (sessionStorage.getItem('active')){
+       tap_id = getSavedValue('active');
+       console.log('--'+tap_id+'----');
+    }
+
+    let listItems = $("#project-status-tap-ul li");
+    for (let li of listItems) {
+        let tap = $(li);
+        if (tap_id !== tap[0].id)
+            tap.removeClass();
+        else
+            $('#'+tap_id).addClass('active');
+    }
+    load();
+  </script>
+{% endblock javascripts %}
