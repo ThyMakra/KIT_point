@@ -1,13 +1,13 @@
 from datetime import datetime
 
-from flask import render_template, request, flash, redirect
+from flask import render_template, request, flash, redirect, jsonify
 from flask_login import (
   login_required
 )
 
 from app import db
-from app.stakeholder.forms import CreateSpecialtyForm, CreateStakeholderForm
-from app.stakeholder.models import Stakeholder, Specialty
+from app.stakeholder.forms import CreateSpecialtyForm, CreateStakeholderForm, CreateAdviserTaskForm
+from app.stakeholder.models import Stakeholder, Specialty, StakeholderTask
 from app.stakeholder import blueprint
 
 
@@ -44,6 +44,7 @@ def update_stakeholder(stakeholder_id):
         stakeholder.department_id = department
         stakeholder.user_id = user
         stakeholder.specialty_id = specialty
+        stakeholder.charge_rate = request.form.get('charge_rate')
         stakeholder.updated_at = datetime.now()
         db.session.merge(stakeholder)
     db.session.commit()
@@ -63,9 +64,10 @@ def create_stakeholder():
     department = request.form['department']
     user = request.form['user']
     specialty = request.form['specialty']
+    charge_rate = request.form.get('charge_rate')
     is_duplicate = Stakeholder.query.filter_by(name=name).first()
     if is_duplicate is None:
-        stakeholder = Stakeholder(name, gender, domain, user, department, specialty)
+        stakeholder = Stakeholder(name, gender, domain, user, department, specialty, charge_rate)
         stakeholder.created_at = datetime.now()
         db.session.add(stakeholder)
         db.session.commit()
@@ -92,10 +94,8 @@ def update_specialty(specialty_id):
     if request.method == 'GET':
         return render_template('/update_specialty.html', form=form, specialty=specialty)
     else:
-        name = request.form['name']
-        code = request.form['code']
-        specialty.name = name
-        specialty.code = code
+        specialty.name = request.form['name']
+        specialty.code = request.form['code']
         specialty.updated_at = datetime.now()
         db.session.merge(specialty)
     db.session.commit()
@@ -110,10 +110,10 @@ def create_specialty():
         form = CreateSpecialtyForm(request.form)
         return render_template('create_specialty.html', form=form)
     name = request.form['name']
-    code = request.form['code']
-    check_name = Specialty.query.filter_by(name=name).first()
-    check_code = Specialty.query.filter_by(code=code).first()
-    if check_name is None and check_code is None:
+    code = request.form.get('code')
+    check_name = db.session.query(Specialty).filter_by(name=name).first()
+    print(check_name)
+    if check_name is None:
         specialty = Specialty(name, code)
         specialty.created_at = datetime.now()
         db.session.add(specialty)
@@ -136,7 +136,7 @@ def delete_specialty(specialty_id):
         return redirect('/stakeholder/specialties')
     except Exception as e:
         print(e)
-        flash('Delete error!')
+        flash('Delete error! some entities are referring to this')
         return redirect('/stakeholder/specialties')
 
 
@@ -152,6 +152,45 @@ def delete_stakeholder(stakeholder_id):
         print(e)
         flash('Delete error!')
         return redirect('/stakeholder/stakeholders')
+
+
+@blueprint.route('/task/create', methods=['POST', 'GET'])
+@login_required
+def create_task():
+    if request.method == 'GET':
+        form = CreateAdviserTaskForm(request.form)
+        return render_template('create_stakeholder_task.html', form=form)
+    else:
+        name = request.form.get('name')
+        status = request.form.get('status')
+        project = request.form.get('project')
+        assign_to = request.form.get('assign_to')
+        actual_hour = request.form.get('actual_hour')
+        start_date = datetime.strptime(request.form.get('start_date'), '%m/%d/%Y')
+        deadline = datetime.strptime(request.form.get('deadline'), '%m/%d/%Y')
+        planning_hour = (deadline - start_date).days*8
+        task = StakeholderTask(name, status, assign_to, project,
+                               planning_hour, actual_hour, start_date, deadline)
+        task.created_at = datetime.today()
+        db.session.add(task)
+        db.session.commit()
+        flash('Adviser task created')
+        return redirect('/project/'+project)
+
+
+@blueprint.route('/task/delete<task_id>')
+@login_required
+def delete_task(task_id):
+    project_id = db.session.query(StakeholderTask).filter_by(id=task_id).first().project_id
+    try:
+        db.session.query(StakeholderTask).filter_by(id=task_id).delete()
+        db.session.commit()
+        flash('Stakeholder task deleted!')
+        return redirect('/project/'+str(project_id))
+    except Exception as e:
+        print(e)
+        flash('Delete error!')
+        return redirect('/project/'+str(project_id))
 
 
 ## Errors

@@ -4,10 +4,10 @@
   <div class="right_col" role="main">
     <div class="">
       <div class="row">
-        <div class="col-md-6 col-xs-12" id="alert_message">
+        <div class="col-md-6 col-xs-12">
           {% with messages = get_flashed_messages() %}
             {% if messages %}
-              <ul class="alert alert-success">
+              <ul class="alert alert-success" >
                 {% for message in messages %}
                   <label>{{ message }}</label>
                 {% endfor %}
@@ -15,7 +15,7 @@
             {% endif %}
           {% endwith %}
           {% if error %}
-            <p class="alert alert-error"><strong>Error:</strong> {{ error }}
+            <p class="alert alert-error" id="alert_message"><strong>Error:</strong> {{ error }}
           {% endif %}
           <div class="x_panel">
             <div class="x_title">
@@ -43,7 +43,8 @@
             <div class="x_content">
 
               <!-- start form for validation -->
-              <form id="demo-form" data-parsley-validate method="post">
+              <form id="specialty-form" data-parsley-validate method="post"
+                    action="{{ url_for('stakeholder_blueprint.create_specialty') }}">
                 {% for field in form if field.widget.input_type != 'hidden' %}
                     <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
                       <label>{{ field.label.text }}</label>
@@ -73,4 +74,13 @@
   {{ super() }}
   {#  <!-- Parsley -->#}
   <script src="{{ url_for('static', filename='vendors/parsleyjs/dist/parsley.min.js') }}"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+       $(document).ready(function() {
+          setTimeout(function() {
+            $('#alert_message').hide();
+          }, 1500);
+    });
+    })
+  </script>
 {% endblock javascripts %}

@@ -1,0 +1,376 @@
+{% extends "base_site.html" %}
+
+{% block stylesheets %}
+  {{ super() }}
+  <link href="{{ url_for('static', filename='vendors/datatables.net-bs/css/dataTables.bootstrap.min.css') }}"
+        rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css') }}"
+        rel="stylesheet">
+  <link
+    href="{{ url_for('static', filename='vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css') }}"
+    rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css') }}"
+        rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendors/datatables.net-scroller-bs/css/scroller.bootstrap.min.css') }}"
+        rel="stylesheet">
+{% endblock stylesheets %}
+
+{% block content %}
+  <div class="right_col" role="main">
+    <div class="clearfix"></div>
+    <div class="page-title">
+      <div class="title_left">
+        <h3>Task <small>Update task info</small></h3>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 col-xs-12">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+              {% for message in messages %}
+                {% if 'error' in message %}
+                <ul class="alert alert-error">
+                    <label>{{ message }}</label>
+                </ul>
+                {% else %}
+                <ul class="alert alert-success" id="alert_message">
+                    <label>{{ message }}</label>
+                </ul>
+                {% endif %}
+              {% endfor %}
+          {% endif %}
+        {% endwith %}
+        {% if error %}
+          <p class="alert alert-error"><strong>Error:</strong> {{ error }}
+        {% endif %}
+        <div class="x_panel">
+          <div class="x_title">
+            <h2>{{ task.name }}</h2>
+            <ul class="nav navbar-right panel_toolbox">
+              <li>
+                <a class="collapse-link" data-toggle="tooltip" data-placement="top" title="Collapse">
+                  <i class="fa fa-chevron-up"></i>
+                </a>
+              </li>
+              <li>
+                <a href="/task/tasks"data-toggle="tooltip" data-placement="top" title="List" >
+                  <i class="fa fa-list-alt"></i>
+                </a></li>
+              <li>
+                <a id="save-task" href="#" data-toggle="tooltip" data-placement="top" title="Save"><i
+                  class="fa fa-save"></i></a>
+              </li>
+              <li>
+                <a class="close-link" data-toggle="tooltip" data-placement="top" title="Close">
+                  <i class="fa fa-close"></i>
+                </a>
+              </li>
+            </ul>
+            <div class="clearfix"></div>
+          </div>
+          <div class="x_content">
+            <!-- start form for validation -->
+            <form id="demo-form" data-parsley-validate method="post">
+              {% for field in form if field.widget.input_type != 'hidden' %}
+
+                <div class="col-md-4 col-sm-6 col-xs-12 form-group has-feedback">
+                  <label>{{ field.label.text }}</label>
+                  {% if field.label.text == 'Project' or field.label.text == 'Planning hour'%}
+                    {{ field(class="form-control has-feedback-left",
+                      tabindex="-1", readonly="readonly", style="pointer-events: none", placeholder=field.label.text) }}
+                    <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+                  {% elif 'Date' in field.label.text or field.label.text=='Deadline' %}
+                    {{ field(class="form-control has-feedback-left custom-date-picker required ", placeholder=field.label.text) }}
+                    <span class="fa fa-calendar-plus-o form-control-feedback left" aria-hidden="true"></span>
+                  {% else %}
+                    {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                    <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+                  {% endif %}
+                </div>
+              {% endfor %}
+              <div class="col-md-4 col-sm-6 col-xs-12 form-group has-feedback">
+                <label for="assign_to">Assign to</label>
+                <select name="assign_to" id="assign_to" class="form-control has-feedback-left"
+                        readonly="readonly" style="pointer-events: none" tabindex="-1">
+                  <option></option>
+                  {% for member in task.project.members %}
+                    <option value="{{ member.id }}">{{ member.name }}</option>
+                  {% endfor %}
+                </select>
+                <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+              </div>
+              <button id="submit" type="submit" hidden="hidden"></button>
+            </form>
+            <!-- end form for validations -->
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+          <div class="x_title">
+            <h2>Daily Report</h2>
+            <ul class="nav navbar-right panel_toolbox">
+              <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+              </li>
+              <li data-toggle="modal" data-target=".bs-example-modal">
+                <a id="add-report" href="#" data-toggle="tooltip" data-target=".bs-example-modal"
+                   data-placement="top" title="Add Report">
+                  <i class="fa fa-plus-circle"></i></a>
+              </li>
+              <li><a class="close-link"><i class="fa fa-close"></i></a>
+            </ul>
+            <div class="clearfix"></div>
+          </div>
+          <table id="datatable-responsive" class="table table-striped table-bordered table-hover dt-responsive nowrap">
+            <thead>
+            <tr>
+              <th>Description</th>
+              <th>Session</th>
+              <th>Semester</th>
+              <th>Date</th>
+              <th style="width: 20%">Edit</th>
+            </tr>
+            </thead>
+
+
+            <tbody>
+            {% for report in task.reports %}
+              <tr>
+                <td>{{ report.description }}</td>
+                <td>{{ report.session }}</td>
+                <td>{{ report.semester }}</td>
+                <td>{{ report.date }}</td>
+                <td>
+                  <a href="#" class="btn btn-primary btn-xs"><i class="fa fa-folder"></i> View </a>
+                  <a href="#" onclick="get_report({{ report.id }})" class="btn btn-info btn-xs"
+                     data-toggle="modal" data-target=".update-report-modal">
+                    <i class="fa fa-pencil"></i>
+                    Edit </a>
+                  <a href="/task/report/delete{{ report.id }}" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i>
+                    Delete </a>
+                </td>
+              </tr>
+
+            {% endfor %}
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--Create Report popup modal-->
+  <div class="modal fade bs-example-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span>
+          </button>
+          <h4 class="modal-title" id="myModalLabel2">Submit Report</h4>
+        </div>
+        <div class="modal-body">
+          <form id="report-form" method="post" action="{{ url_for('task_blueprint.create_report') }}">
+            {% for field in create_report_form if field.widget.input_type != 'hidden' %}
+              <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 form-group has-feedback">
+                {% if field.label.text == 'Session' %}
+                  {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                  <span class="fa fa-sort-numeric-desc form-control-feedback left" aria-hidden="true"></span>
+                {% elif field.label.text == 'Date' %}
+                  {{ field(class="form-control has-feedback-left custom-date-picker required", placeholder=field.label.text) }}
+                  <span class="fa fa-calendar-plus-o form-control-feedback left" aria-hidden="true"></span>
+                {% else %}
+                  {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                  <span class="fa fa-pencil-square-o form-control-feedback left" aria-hidden="true"></span>
+                {% endif %}
+              </div>
+            {% endfor %}
+            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 form-group has-feedback">
+              <select name="semester" id="semester" class="form-control has-feedback-left" style="pointer-events: none"
+                      readonly="readonly" tabindex="-1">
+                <option></option>
+                {% for semester in task.student.batch.semesters %}
+                  <option value="{{ semester.id }}">{{ semester.name }}</option>
+                {% endfor %}
+              </select>
+              <span class="fa fa-map form-control-feedback left" aria-hidden="true"></span>
+            </div>
+            <label for="task" hidden="hidden"></label>
+            <input id="task" type="number" hidden="hidden" name="task" value="{{ task.id }}">
+            <label for="project" hidden="hidden"></label>
+            <input id="project" type="number" hidden="hidden" name="project" value="{{ task.project_id }}">
+            <label for="assign_to" hidden="hidden"></label>
+            <input id="assign_to" type="number" hidden="hidden" name="assign_to" value="{{ task.assign_to }}">
+            <label for="batch" hidden="hidden"></label>
+            <input id="batch" type="number" hidden="hidden" name="batch" value="{{ task.student.batch_id }}">
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="submit" form="report-form" class="btn btn-primary">Save</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!--Update Report popup modal-->
+  <div class="modal fade update-report-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span>
+          </button>
+          <h4 class="modal-title" id="myModalLabel2">Update Report</h4>
+        </div>
+        <div class="modal-body">
+          <form id="update-report-form" method="post">
+            {% for field in update_report_form if field.widget.input_type != 'hidden' %}
+              <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 form-group has-feedback">
+                {% if field.label.text == 'Session' %}
+                  {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                  <span class="fa fa-sort-numeric-desc form-control-feedback left" aria-hidden="true"></span>
+                {% elif field.label.text == 'Date' %}
+                  {{ field(class="form-control has-feedback-left", readonly="readonly", placeholder=field.label.text) }}
+                  <span class="fa fa-calendar-plus-o form-control-feedback left" aria-hidden="true"></span>
+                {% else %}
+                  {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                  <span class="fa fa-pencil-square-o form-control-feedback left" aria-hidden="true"></span>
+                {% endif %}
+              </div>
+            {% endfor %}
+            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 form-group has-feedback">
+              <select name="semester" id="update-semester" class="form-control has-feedback-left" tabindex="-1"
+                      readonly="readonly" style="pointer-events: none">
+                <optoin></optoin>
+                {% for semester in task.student.batch.semesters %}
+                  <option value="{{ semester.id }}">{{ semester.name }}</option>
+                {% endfor %}
+              </select>
+              <span class="fa fa-map form-control-feedback left" aria-hidden="true"></span>
+            </div>
+            <label for="update-task" hidden="hidden"></label>
+            <input id="update-task" type="number" hidden="hidden" name="task" value="{{ task.id }}">
+            <label for="update-project" hidden="hidden"></label>
+            <input id="update-project" type="number" hidden="hidden" name="project" value="{{ task.project_id }}">
+            <label for="update-assign_to" hidden="hidden"></label>
+            <input id="update-assign_to" type="number" hidden="hidden" name="assign_to" value="{{ task.assign_to }}">
+            <label for="update-batch" hidden="hidden"></label>
+            <input id="update-batch" type="number" hidden="hidden" name="batch" value="{{ task.student.batch_id }}">
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="submit" form="update-report-form" class="btn btn-primary">Save</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+{% block javascripts %}
+  {{ super() }}
+  <!-- Datatables -->
+  <script src="{{ url_for('static', filename='vendors/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-buttons/js/dataTables.buttons.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-buttons-bs/js/buttons.bootstrap.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/datatables.net-buttons/js/buttons.flash.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/datatables.net-buttons/js/buttons.html5.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/datatables.net-buttons/js/buttons.print.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-keytable/js/dataTables.keyTable.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-responsive/js/dataTables.responsive.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-responsive-bs/js/responsive.bootstrap.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-scroller/js/dataTables.scroller.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/jszip/dist/jszip.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/pdfmake/build/pdfmake.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/pdfmake/build/vfs_fonts.js') }}"></script>
+  {#  <!-- Parsley -->#}
+  <script src="{{ url_for('static', filename='vendors/parsleyjs/dist/parsley.min.js') }}"></script>
+  <script type="text/javascript">
+    function format_date(d){
+      let a = new Date(d);
+      return (a.getMonth()+1)+'/'+a.getDate()+'/'+a.getFullYear()
+    }
+    {#-----set values to the task form------#}
+    $(document).ready(function() {
+      $('#name').val('{{ task.name }}');
+      $('#status').val({{ task.status_id }});
+      $('#start_date').val(format_date('{{ task.start_date }}'));
+      if ('{{ task.end_date }}'.toLowerCase() !== 'none')
+        $('#end_date').val(format_date('{{ task.end_date }}'));
+      else $('#end_date').val('');
+      $('#deadline').val(format_date('{{ task.deadline }}'));
+      $('#planning_hour').val({{ task.planning_hour }});
+      $('#actual_hour').val({{ task.actual_hour }});
+      $('#project').val({{ task.project.id }});
+      $('#assign_to').val({{ task.assign_to }});
+      $('.custom-date-picker').daterangepicker({
+        singleDatePicker: true,
+        singleClasses: "picker_1"
+      });
+      $('#save-task').on('click', function() {
+        $('#submit').trigger('click')
+      });
+      setTimeout(function() {
+        $('#alert_message').hide();
+      }, 2000);
+    });
+    {#----get daily report info----#}
+    function get_report(report_id) {
+      $.getJSON('/task/get_report/'+report_id, function(report) {
+        $('#update-session').val(report.session);
+        $('#update-date').val(format_date(report.date));
+        $('#update-description').val(report.description);
+        $('#update-semester').val(report.semester);
+      });
+      update_report(report_id)
+    }
+    {#----update daily report info-----#}
+    function update_report(report_id) {
+      $('#update-report-form').on('submit', function(e) {
+        e.preventDefault();
+        $.ajax({
+          type: 'POST',
+          url: '/task/report/'+report_id,
+          dataType: 'json',
+          data: $('#update-report-form').serialize(),
+          success: function(res) {
+            if(res==='success'){
+              alertify.notify('Report updated.', 'success', 5);
+              setTimeout(function() {
+                window.location.reload()
+              }, 1500);
+            }
+          },
+        });
+      })
+    }
+    $('#add-report').on('click', function() {
+      let now = format_date(new Date());
+      $.getJSON('get_current_semester?today='+now+'&batch='+'{{ task.student.batch_id }}', function(res) {
+          $('#semester').val(res)
+        });
+    });
+    $(document).ready(function() {
+      $('#date').on('change', function() {
+        $.getJSON('get_current_semester?today='+$(this).val()+'&batch='+'{{ task.student.batch_id }}', function(res) {
+          $('#semester').val(res)
+        });
+      });
+      $('#update-date').on('change', function() {
+        $.getJSON('get_current_semester?today='+$(this).val()+'&batch='+'{{ task.student.batch_id }}', function(res) {
+          $('#update-semester').val(res)
+        });
+      })
+    });
+  </script>
+{% endblock javascripts %}

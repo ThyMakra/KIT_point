@@ -1,0 +1,538 @@
+{% extends "base_site.html" %}
+
+{% block stylesheets %}
+  {{ super() }}
+  <link href="{{ url_for('static', filename='vendors/datatables.net-bs/css/dataTables.bootstrap.min.css') }}"
+        rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css') }}"
+        rel="stylesheet">
+  <link
+    href="{{ url_for('static', filename='vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css') }}"
+    rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css') }}"
+        rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendors/datatables.net-scroller-bs/css/scroller.bootstrap.min.css') }}"
+        rel="stylesheet">
+{% endblock stylesheets %}
+
+{% block content %}
+  <div class="right_col" role="main">
+    <div class="clearfix"></div>
+    <div class="row">
+  <div class="col-xs-12, col-sm-12 col-md-12 col-lg-12">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+
+          {% for message in messages %}
+            {% if 'error' in message %}
+            <ul class="alert alert-error">
+              <label>{{ message }}</label>
+            </ul>
+            {% else %}
+            <ul class="alert alert-success" id="alert_message">
+              <label>{{ message }}</label>
+            </ul>
+            {% endif %}
+          {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+    {% if error %}
+      <p class="alert alert-error"><strong>Error:</strong> {{ error }}
+    {% endif %}
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="x_panel">
+        <div class="x_title">
+          <h2>{{ project }}</h2>
+          <ul class="nav navbar-right panel_toolbox">
+            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+            <li><a href="/project/projects"><i class="fa fa-list-alt"></i></a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i
+                class="fa fa-wrench"></i></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#" id="save_project">Save</a></li>
+                <li><a href="#">Move to complete</a></li>
+              </ul>
+            </li>
+            <li><a class="close-link"><i class="fa fa-close"></i></a>
+            </li>
+          </ul>
+          <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+
+          <!-- start form for validation -->
+          <form id="demo-form" data-parsley-validate method="post">
+            {% for field in form if field.widget.input_type != 'hidden' %}
+              {% if field.label.text == 'Advisers' or field.label.text == 'Skills' %}
+                <div class="col-md-6 col-sm-6 col-sx-12 form-group">
+                  <label>{{ field.label.text }}</label>
+                  {{ field(class="select2_multiple form-control has-feedback-left required", multiple="multiple",
+                   placeholder=field.label.text) }}
+                </div>
+              {% elif field.label.text == 'Chairman Remark' or field.label.text == 'President Remark' %}
+                <div class="col-md-6 col-sm-6 col-sx-12 form-group has-feedback">
+                  <label>{{ field.label.text }}</label>
+                  {{ field(class="form-control has-feedback-left", placeholder=field.label.text) }}
+                  <span class="fa fa-edit form-control-feedback left" aria-hidden="true"></span>
+                </div>
+              {% elif field.label.text == 'Members' %}
+                <div class="col-md-12 col-sm-12 col-sx-12 form-group">
+                  <label>{{ field.label.text }}</label>
+                  {{ field(class="select2_multiple form-control has-feedback-left", multiple="multiple",
+                  placeholder=field.label.text) }}
+                </div>
+              {% elif field.label.text == 'Name' or field.label.text == 'Description' %}
+                <div class="col-md-6 col-sm-6 col-sx-12 form-group has-feedback">
+                  <label>{{ field.label.text }}</label>
+                  {{ field(class="form-control has-feedback-left", placeholder=field.label.text) }}
+                  <span class="fa fa-edit form-control-feedback left" aria-hidden="true"></span>
+                </div>
+              {% else %}
+                <div class="col-md-3 col-sm-6 col-xs-12 form-group has-feedback">
+                  <label>{{ field.label.text }}</label>
+                  {% if field.label.text == 'Code' %}
+                    {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                    <span class="fa fa-code form-control-feedback left" aria-hidden="true"></span>
+                  {% elif field.label.text == 'Budget' %}
+                    {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                    <span class="fa fa-dollar form-control-feedback left" aria-hidden="true"></span>
+                  {% elif field.label.text == 'Contingency' %}
+                    {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                    <span class="fa fa-percent form-control-feedback left" aria-hidden="true"></span>
+                  {% elif field.label.text == 'Leader' %}
+                    {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                    <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+                  {% elif field.label.text == 'Coordinator' %}
+                    {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                    <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+                  {% elif field.label.text == 'Is old' %}
+                    {{ field(class="form-control has-feedback-left") }}
+                    <span class="fa fa-check-circle form-control-feedback left" aria-hidden="true"></span>
+                  {% elif field.label.text == 'Start Date' %}
+                    {{ field(class="form-control has-feedback-left required custom-date-picker", placeholder=field.label.text) }}
+                    <span class="fa fa-calendar form-control-feedback left" aria-hidden="true"></span>
+                  {% elif field.label.text == 'Deadline' %}
+                    {{ field(class="form-control has-feedback-left required custom-date-picker", placeholder=field.label.text) }}
+                    <span class="fa fa-calendar form-control-feedback left" aria-hidden="true"></span>
+                  {% elif field.label.text == 'End Date' %}
+                    {{ field(class="form-control has-feedback-left custom-date-picker", placeholder=field.label.text) }}
+                    <span class="fa fa-calendar form-control-feedback left" aria-hidden="true"></span>
+                  {% else %}
+                    {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                    <span class="fa fa-star form-control-feedback left" aria-hidden="true"></span>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endfor %}
+            <input type="submit" id="submit" hidden="hidden">
+          </form>
+          <!-- end form for validations -->
+          <!-- Small modal -->
+          <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+              <div class="modal-content">
+
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                    aria-hidden="true">×</span>
+                  </button>
+                  <h4 class="modal-title" id="myModalLabel2">Members</h4>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group has-feedback">
+                    <input name="text" type="text" class="form-control has-feedback-left" id="text">
+                    <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {# member task table view #}
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="x_panel">
+        <div class="x_title">
+          <h2>Member Tasks</h2>
+          <ul class="nav navbar-right panel_toolbox">
+            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+            </li>
+            <li><a href="#" data-toggle="modal" data-target=".member-task"><i class="fa fa-plus-circle"></i></a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">Settings 1</a>
+                </li>
+                <li><a href="#">Settings 2</a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+          <div class="clearfix"></div>
+        </div>
+        <table id="datatable-responsive-member" class="table table-striped table-bordered table-hover dt-responsive nowrap">
+          <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Assign to</th>
+            <th>Start date</th>
+            <th>Deadline</th>
+            <th>Hours</th>
+            <th style="width: 20%">Edit</th>
+          </tr>
+          </thead>
+
+
+          <tbody>
+          {% for task in project.tasks %}
+             {% if current_user.roles[0].name == 'ADMIN' or current_user.roles[0].name == 'COORDINATOR' %}
+               <tr>
+                  <td>{{ task.name }}</td>
+                  <td>{{ task.task_status }}</td>
+                  <td>{{ task.student }}</td>
+                  <td>{{ task.start_date }}</td>
+                  <td>{{ task.deadline }}</td>
+                  <td>{{ task.actual_hour }}</td>
+                  <td>
+                    <a href="#" class="btn btn-primary btn-xs"><i class="fa fa-folder"></i> View </a>
+                    <a href="/task/{{ task.id }}" class="btn btn-info btn-xs"><i class="fa fa-pencil"></i> Edit </a>
+                    <a href="/task/delete{{ task.id }}" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> Delete </a>
+                  </td>
+                </tr>
+             {% elif current_user.student.id == task.assign_to %}
+                <tr>
+                  <td>{{ task.name }}</td>
+                  <td>{{ task.task_status }}</td>
+                  <td>{{ task.student }}</td>
+                  <td>{{ task.start_date }}</td>
+                  <td>{{ task.deadline }}</td>
+                  <td>{{ task.actual_hour }}</td>
+                  <td>
+                    <a href="#" class="btn btn-primary btn-xs"><i class="fa fa-folder"></i> View </a>
+                    <a href="/task/{{ task.id }}" class="btn btn-info btn-xs"><i class="fa fa-pencil"></i> Edit </a>
+                    <a href="/task/delete{{ task.id }}" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> Delete </a>
+                  </td>
+                </tr>
+            {% endif %}
+
+          {% endfor %}
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {# adviser task table view #}
+    {% if current_user.roles[0].name == 'ADMIN' or current_user.roles[0].name == 'COORDINATOR' %}
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="x_panel">
+        <div class="x_title">
+          <h2>Adviser Tasks</h2>
+          <ul class="nav navbar-right panel_toolbox">
+            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+            </li>
+            <li><a href="#" data-toggle="modal" data-target=".adviser-task"><i class="fa fa-plus-circle"></i></a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">Settings 1</a>
+                </li>
+                <li><a href="#">Settings 2</a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+          <div class="clearfix"></div>
+        </div>
+        <table id="datatable-responsive-adviser" class="table table-striped table-bordered table-hover dt-responsive nowrap">
+          <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Assign to</th>
+            <th>Start date</th>
+            <th>Deadline</th>
+            <th>Hours</th>
+            <th style="width: 20%">Edit</th>
+          </tr>
+          </thead>
+
+
+          <tbody>
+          {% for task in project.stakeholder_tasks %}
+            <tr>
+              <td>{{ task.name }}</td>
+              <td>{{ task.task_status }}</td>
+              <td>{{ task.stakeholder }}</td>
+              <td>{{ task.start_date }}</td>
+              <td>{{ task.deadline }}</td>
+              <td>{{ task.actual_hour }}</td>
+              <td>
+                <a href="#" class="btn btn-primary btn-xs"><i class="fa fa-folder"></i> View </a>
+                <a href="/stakeholder/task/{{ task.id }}" class="btn btn-info btn-xs"><i class="fa fa-pencil"></i> Edit </a>
+                <a href="/stakeholder/task/delete{{ task.id }}" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> Delete </a>
+              </td>
+            </tr>
+
+          {% endfor %}
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  </div>
+  {#  assign task to project members pop up#}
+  <div class="modal fade member-task" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span>
+          </button>
+          <h4 class="modal-title" id="myModalLabel">Assign Member Task</h4>
+        </div>
+        <div class="modal-body">
+
+          <!-- start form for validation -->
+          <form id="member-task-form" data-parsley-validate method="post" action="{{ url_for('task_blueprint.create_task') }}">
+            {% for field in taskForm if field.widget.input_type != 'hidden' %}
+              <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
+                <label>{{ field.label.text }}</label>
+                {% if field.label.text == 'Project' %}
+                  {{ field(class="form-control has-feedback-left required", placeholder=field.label.text,
+                  style="pointer-events: none", readonly="readonly", tabindex="-1") }}
+                  <span class="fa fa-file-powerpoint-o form-control-feedback left" aria-hidden="true"></span>
+                {% elif field.label.text == 'Start Date' or field.label.text == 'Deadline' %}
+                  {{ field(class="form-control has-feedback-left custom-date-picker required", placeholder=field.label.text) }}
+                  <span class="fa fa-calendar-plus-o form-control-feedback left" aria-hidden="true"></span>
+                {% else %}
+                  {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                  <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+                {% endif %}
+              </div>
+            {% endfor %}
+            <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
+              <label for="assign_to">Assign to</label>
+              <select name="assign_to" id="assign_to" class="form-control has-feedback-left required">
+                <option></option>
+                {% for member in project.members %}
+                  <option value="{{ member.id }}">{{ member.name }}</option>
+                {% endfor %}
+              </select>
+              <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+            </div>
+          </form>
+          <!-- end form for validations -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary" form="member-task-form">Save changes</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  {#  assign task to advisers pop up#}
+  <div class="modal fade adviser-task" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span>
+          </button>
+          <h4 class="modal-title" id="myModalLabel">Assign Adviser Task</h4>
+        </div>
+        <div class="modal-body">
+
+          <!-- start form for validation -->
+          <form id="adviser-task-form" data-parsley-validate method="post" action="{{ url_for('stakeholder_blueprint.create_task') }}">
+            {% for field in adviserTaskForm if field.widget.input_type != 'hidden' %}
+              <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
+                <label>{{ field.label.text }}</label>
+                {% if field.label.text == 'Project' %}
+                  {{ field(class="form-control has-feedback-left required", placeholder=field.label.text,
+                  style="pointer-events: none", readonly="readonly", tabindex="-1") }}
+                  <span class="fa fa-file-powerpoint-o form-control-feedback left" aria-hidden="true"></span>
+                {% elif field.label.text == 'Start Date' or field.label.text == 'Deadline' %}
+                  {{ field(class="form-control has-feedback-left custom-date-picker required", placeholder=field.label.text) }}
+                  <span class="fa fa-calendar-plus-o form-control-feedback left" aria-hidden="true"></span>
+                {% else %}
+                  {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                  <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+                {% endif %}
+              </div>
+            {% endfor %}
+            <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
+              <label for="assign_to">Assign to</label>
+              <select name="assign_to" id="assign_to" class="form-control has-feedback-left required">
+                <option></option>
+                {% for adviser in project.advisers %}
+                  <option value="{{ adviser.id }}">{{ adviser.name }}</option>
+                {% endfor %}
+              </select>
+              <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+            </div>
+          </form>
+          <!-- end form for validations -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary" form="adviser-task-form">Save changes</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+{% block javascripts %}
+  {{ super() }}
+  {#  <!-- Parsley -->#}
+  <script src="{{ url_for('static', filename='vendors/parsleyjs/dist/parsley.min.js') }}"></script>
+{#  <script src="{{ url_for('static', filename='vendors/select2/dist/js/select2.full.min.js') }}"></script>#}
+{#  <script src="{{ url_for('static', filename='vendors/select2/dist/js/select2.min.js') }}"></script>#}
+  <!-- Datatables -->
+  <script src="{{ url_for('static', filename='vendors/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-buttons/js/dataTables.buttons.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-buttons-bs/js/buttons.bootstrap.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/datatables.net-buttons/js/buttons.flash.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/datatables.net-buttons/js/buttons.html5.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/datatables.net-buttons/js/buttons.print.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-keytable/js/dataTables.keyTable.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-responsive/js/dataTables.responsive.min.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-responsive-bs/js/responsive.bootstrap.js') }}"></script>
+  <script
+    src="{{ url_for('static', filename='vendors/datatables.net-scroller/js/dataTables.scroller.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/jszip/dist/jszip.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/pdfmake/build/pdfmake.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendors/pdfmake/build/vfs_fonts.js') }}"></script>
+  <script type="text/javascript">
+    function format_date(d){
+      let date = new Date(d);
+      return date.getMonth()+1+'/'+date.getDate()+'/'+date.getFullYear()
+    }
+    let members = [];
+    let advisers = [];
+    let skills = [];
+    let $skill = $('#skill');
+    let $member = $('#member');
+    let $adviser = $('#adviser');
+    {% for member in project.members %}
+      members.push({{ member.id }});
+    {% endfor %}
+    {% for adviser in project.advisers %}
+      advisers.push({{ adviser.id }});
+    {% endfor %}
+    {% for skill in project.skills %}
+      skills.push({{ skill.id }});
+    {% endfor %}
+
+    members = members.filter(item => item !== {{ project.leader }});
+    console.log(members);
+    $(document).ready(function() {
+      $('#name').val('{{ project.name }}');
+      $('#code').val('{{ project.code }}');
+      $('#description').val('{{ project.description }}');
+      $('#budget').val({{ project.budget }});
+      $('#contingency').val({{ project.contingency }});
+      if ('{{ project.estimate_point }}'.toLowerCase() !== 'none')
+        $('#estimate_point').val({{ project.estimate_point }});
+      else $('#estimate_point').val(0);
+      if ('{{ project.actual_point }}'.toLowerCase() !== 'none')
+        $('#actual_point').val({{ project.actual_point }});
+      else $('#actual_point').val(0);
+      if ('{{ project.propose_point }}'.toLowerCase() !== 'none')
+        $('#propose_point').val({{ project.propose_point }});
+      else $('#propose_point').val(0);
+      if ('{{ project.acquire_point }}'.toLowerCase() !== 'none')
+        $('#acquire_point').val({{ project.acquire_point }});
+      else $('#acquire_point').val(0);
+      $('#leader').val({{ project.leader }});
+      $('#coordinator').val({{ project.coordinator }});
+      $('#status').val({{ project.status.id }});
+      $('#start_date').val(format_date('{{ project.start_date }}'));
+      $('#deadline').val(format_date('{{ project.deadline }}'));
+      if ('{{ project.end_date }}'.toLowerCase() !== 'none')
+        $('#end_date').val(format_date('{{ project.end_date }}'));
+      {#else $('#end_date').val('01/10/2020');#}
+      if ('{{ project.is_old }}'.toLowerCase() === 'true') {
+        $('#is_old').prop('checked', true);
+      } else {
+        $('#is_old').prop('checked', false);
+      }
+      $('#category').val({{ project.categories[0].id }});
+      $('#sub_category').val({{ project.sub_categories[0].id }});
+      if ('{{ project.chairman_remark }}'.toLowerCase() !== 'none')
+        $('#chairman_remark').text('{{ project.chairman_remark }}');
+      if ('{{ project.president_remark }}'.toLowerCase() !== 'none')
+        $('#president_remark').text('{{ project.president_remark }}');
+
+      $member.select2({
+        placeholder: 'Select a member',
+        allowClear: true,
+      });
+      $adviser.select2({
+        placeholder: 'Select a adviser',
+        allowClear: true,
+      });
+      $skill.select2({
+        placeholder: 'Select a skill',
+        allowClear: true,
+      });
+      $('#save_project').on('click', function() {
+        $('#submit').trigger('click');
+      });
+      $member.val(members);
+      $member.trigger('change');
+      $adviser.val(advisers);
+      $adviser.trigger('change');
+      $skill.val(skills);
+      $skill.trigger('change');
+      $('.custom-date-picker').daterangepicker({
+        singleDatePicker: true,
+        singleClasses: "picker_1"
+      });
+    });
+    $member.on('change', function() {
+        let member = $(this).val(); 
+              
+        member = parseInt(member[0]);
+        let leader = parseInt($('#leader').val());
+        if (member === leader){
+          alertify.notify('Already assigned as leader.', 'error', 5);
+          setTimeout(function() {
+            window.location.reload()
+          }, 1000)
+        }
+      });
+  </script>
+  <!--task info-->
+  <script type="text/javascript">
+    $(document).ready(function() {
+      setTimeout(function() {
+        $('#alert_message').hide();
+      }, 2000);
+      $('#project').val({{ project.id }});
+      $('#adviser_project').val({{ project.id }});
+      $('#datatable-responsive-adviser').DataTable();
+      $('#datatable-responsive-member').DataTable();
+    });
+  </script>
+{% endblock javascripts %}

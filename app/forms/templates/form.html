@@ -473,7 +473,7 @@
                 <div class="form-group">
                   <label class="control-label col-md-3 col-sm-3 col-xs-12">Select Multiple</label>
                   <div class="col-md-9 col-sm-9 col-xs-12">
-                    <select class="select2_multiple form-control" multiple="multiple">
+                    <select class="select2_multiple form-control" multiple="multiple" id="test">
                       <option>Choose option</option>
                       <option>Option one</option>
                       <option>Option two</option>
@@ -1042,4 +1042,9 @@
   {{ super()}}
   <!-- Parsley -->
   <script src="{{ url_for('static', filename='vendors/parsleyjs/dist/parsley.min.js') }}"></script>
+  <script>
+    $(document).ready(function() {
+      $('#test').select2();
+    })
+  </script>
 {% endblock javascripts %}

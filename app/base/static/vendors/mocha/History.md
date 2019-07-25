@@ -90,7 +90,7 @@
 1.12.1 / 2013-08-29
 ==================
 
- * remove test.js from .gitignore
+ * remove onchange-events.js from .gitignore
  * update included version of ms.js
 
 1.12.0 / 2013-07-01

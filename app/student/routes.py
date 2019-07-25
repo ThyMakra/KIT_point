@@ -1,21 +1,15 @@
+from datetime import datetime
+
 from flask import jsonify, render_template, request, flash, redirect, url_for
 from flask_login import (
-  login_required,
-  current_user
+  login_required, current_user
 )
 
 from app import db
-from app.student import blueprint
-from app.student.models import Student, Rank, ChargeTable
-from app.student.forms import CreateStudentForm, CreateRankForm, CreateChargeTableForm
 from app.base.models import Batch, Semester
-from datetime import datetime
-
-
-# @blueprint.route('/<template>')
-# @login_required
-# def route_template(template):
-#     return render_template(template + '.html')
+from app.student import blueprint
+from app.student.forms import CreateStudentForm, CreateRankForm, CreateChargeTableForm
+from app.student.models import Student, Rank, ChargeTable, StudentSummary
 
 
 @blueprint.route('/fixed_<template>')
@@ -32,25 +26,21 @@ def route_errors(error):
 @blueprint.route('/charge_tables')
 @login_required
 def get_all_charge_tables():
+    if current_user.roles[0].name != 'ADMIN':
+        return render_template('errors/page_403.html'), 403
     charge_tables = db.session.query(ChargeTable).all()
-<<<<<<< HEAD
-    return render_template('stakeholder.html', charge_tables=charge_tables)
-=======
     return render_template('charge_table.html', charge_tables=charge_tables)
->>>>>>> created an account
 
 
 @blueprint.route('charge_table/<charge_id>', methods=['GET', 'POST'])
 @login_required
 def update_charge_table(charge_id):
+    if current_user.roles[0].name != 'ADMIN':
+        return render_template('errors/page_403.html'), 403
     form = CreateChargeTableForm(request.form)
     charge_table = ChargeTable.query.filter_by(id=charge_id).first()
     if request.method == 'GET':
-<<<<<<< HEAD
-        return render_template('/update_stakeholder.html', form=form, charge_table=charge_table)
-=======
         return render_template('/update_charge_table.html', form=form, charge_table=charge_table)
->>>>>>> created an account
     else:
         price = request.form['price']
         charge_table.price = price
@@ -61,16 +51,14 @@ def update_charge_table(charge_id):
     return redirect('/student/charge_tables')
 
 
-@blueprint.route('/charge_table/create', methods=['GET', 'POST'])
+@blueprint.route('charge_table/create', methods=['GET', 'POST'])
 @login_required
 def create_charge_table():
+    if current_user.roles[0].name != 'ADMIN':
+        return render_template('errors/page_403.html'), 403
     if request.method == 'GET':
         form = CreateChargeTableForm(request.form)
-<<<<<<< HEAD
-        return render_template('create_stakeholder.html', form=form)
-=======
         return render_template('create_charge_table.html', form=form)
->>>>>>> created an account
     price = request.form['price']
     department = request.form['department']
     batch = request.form['batch']
@@ -78,7 +66,8 @@ def create_charge_table():
     rank = request.form['rank']
     is_duplicate = ChargeTable.query.filter_by(department_id=department,
                                                batch_id=batch,
-                                               semester_id=semester).first()
+                                               semester_id=semester,
+                                               rank_id=rank).first()
     if is_duplicate is None:
         charge_table = ChargeTable(price, department, batch, semester, rank)
         charge_table.created_at = datetime.now()
@@ -89,27 +78,23 @@ def create_charge_table():
     else:
         form = CreateChargeTableForm(request.form)
         error = 'Duplicate entry'
-<<<<<<< HEAD
-        return render_template('create_stakeholder.html', error=error, form=form)
-=======
         return render_template('create_charge_table.html', error=error, form=form)
->>>>>>> created an account
 
 
 @blueprint.route('/ranks')
 @login_required
 def get_all_ranks():
+    if current_user.roles[0].name != 'ADMIN':
+        return render_template('errors/page_403.html'), 403
     ranks = db.session.query(Rank).all()
-<<<<<<< HEAD
-    return render_template('specialty.html', ranks=ranks)
-=======
     return render_template('rank.html', ranks=ranks)
->>>>>>> created an account
 
 
 @blueprint.route('/rank/delete<rank_id>')
 @login_required
 def delete_rank(rank_id):
+    if current_user.roles[0].name != 'ADMIN':
+        return render_template('errors/page_403.html'), 403
     try:
         Rank.query.filter_by(id=rank_id).delete()
         db.session.commit()
@@ -125,14 +110,12 @@ def delete_rank(rank_id):
 @blueprint.route('rank/<rank_id>', methods=['GET', 'POST'])
 @login_required
 def update_rank(rank_id):
+    if current_user.roles[0].name != 'ADMIN':
+        return render_template('errors/page_403.html'), 403
     form = CreateRankForm(request.form)
     rank = Rank.query.filter_by(id=rank_id).first()
     if request.method == 'GET':
-<<<<<<< HEAD
-        return render_template('/update_specialty.html', form=form, rank=rank)
-=======
         return render_template('/update_rank.html', form=form, rank=rank)
->>>>>>> created an account
     else:
         name = request.form['name']
         code = request.form['code']
@@ -150,13 +133,11 @@ def update_rank(rank_id):
 @blueprint.route('/rank/create', methods=['GET', 'POST'])
 @login_required
 def create_rank():
+    if current_user.roles[0].name != 'ADMIN':
+        return render_template('errors/page_403.html'), 403
     if request.method == 'GET':
         rank_form = CreateRankForm(request.form)
-<<<<<<< HEAD
-        return render_template('create_specialty.html', rank_form=rank_form)
-=======
         return render_template('create_rank.html', rank_form=rank_form)
->>>>>>> created an account
     name = request.form['name']
     code = request.form['code']
     description = request.form['description']
@@ -172,16 +153,15 @@ def create_rank():
     else:
         rank_form = CreateRankForm(request.form)
         error = 'Duplicate entry'
-<<<<<<< HEAD
-        return render_template('create_specialty.html', error=error, rank_form=rank_form)
-=======
         return render_template('create_rank.html', error=error, rank_form=rank_form)
->>>>>>> created an account
 
 
 @blueprint.route('/students')
 @login_required
 def get_all_students():
+    if current_user.roles[0].name != 'ADMIN':
+        students = Student.query.filter_by(id=current_user.student.id).all()
+        return render_template('student.html', students=students)
     students = db.session.query(Student).all()
     return render_template('student.html', students=students)
 
@@ -189,6 +169,8 @@ def get_all_students():
 @blueprint.route('/delete<student_id>')
 @login_required
 def delete_student(student_id):
+    if current_user.roles[0].name != 'ADMIN':
+        return render_template('errors/page_403.html'), 403
     try:
         Student.query.filter_by(id=student_id).delete()
         db.session.commit()
@@ -243,6 +225,8 @@ def get_semester(batch_id):
 @blueprint.route('/create', methods=['GET', 'POST'])
 @login_required
 def create_student():
+    if current_user.roles[0].name != 'ADMIN':
+        return render_template('errors/page_403.html'), 403
     student_form = CreateStudentForm(request.form)
     if request.method == 'GET':
         return render_template('/create_student.html', student_form=student_form)
@@ -252,27 +236,22 @@ def create_student():
     user = request.form['user']
     batch = request.form['batch']
     department = request.form['department']
-    rank = request.form['rank']
-    student = Student(name, roll, gender, user, batch, department, rank)
+    rank_id = request.form['rank']
     check_name = db.session.query(Student).filter_by(name=name).first()
     check_roll = db.session.query(Student).filter_by(roll_number=roll).first()
     if check_name is None and check_roll is None:
+        student = Student(name, roll, gender, user, batch, department, rank_id)
         db.session.add(student)
         db.session.commit()
         flash('New student created')
         return redirect(url_for('student_blueprint.create_student'))
     else:
-<<<<<<< HEAD
-
-=======
-        
->>>>>>> created an account
         if check_name is None:
             error = "Duplicate roll number!"
         elif check_roll is None:
             error = check_name, "already exists!"
         else:
-            error = "Both name and roll number alreay exist!"
+            error = "Both name and roll number already exist!"
         return render_template('/create_student.html', error=error, student_form=student_form)
     # return jsonify('success')
 
@@ -280,6 +259,8 @@ def create_student():
 @blueprint.route('/<student_id>', methods=['GET', 'POST'])
 @login_required
 def update_student(student_id):
+    if current_user.roles[0].name != 'ADMIN':
+        return render_template('errors/page_403.html'), 403
     form = CreateStudentForm(request.form)
     student = Student.query.filter_by(id=student_id).first()
     if request.method == 'GET':
@@ -293,32 +274,54 @@ def update_student(student_id):
         user = request.form['user']
         batch = request.form['batch']
         department = request.form['department']
-        rank = request.form['rank']
         student.name = name
         student.roll_number = roll_number
         student.gender = gender
         student.user_id = user
         student.batch_id = batch
         student.department_id = department
-        student.rank_id = rank
+        student.rank_id = request.form['rank']
         db.session.merge(student)
     db.session.commit()
     flash('Student updated')
     return redirect('students')
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> created an account
+
+@blueprint.route('/summaries')
+@login_required
+def get_summaries():
+    if current_user.roles[0].name == 'ADMIN':
+        summaries = StudentSummary.query.all()
+        return render_template('student_summary.html', summaries=summaries)
+    if current_user.roles[0].name == 'USER':
+        summaries = current_user.student.summaries
+        return render_template('student_summary.html', summaries=summaries)
+
+
+@blueprint.route('/summary/delete<summary_id>')
+@login_required
+def delete_summary(summary_id):
+    if current_user.roles[0].name != 'ADMIN':
+        return render_template('errors/page_403.html'), 403
+    try:
+        db.session.query(StudentSummary).filter_by(id=summary_id).delete()
+        db.session.commit()
+        flash('Summary deleted.')
+        return redirect('/student/summaries')
+    except Exception as e:
+        print(e)
+        flash('Delete error!')
+        return redirect('/student/summaries')
+
 
 ## Errors
 @blueprint.errorhandler(403)
-def access_forbidden(error):
+def access_forbidden():
     return render_template('errors/page_403.html'), 403
 
 
 @blueprint.errorhandler(404)
-def not_found_error(error):
+def not_found_error():
     return render_template('errors/page_404.html'), 404
 
 

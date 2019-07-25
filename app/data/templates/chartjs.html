@@ -163,7 +163,7 @@
               <div class="clearfix"></div>
             </div>
             <div class="x_content">
-              <canvas id="pieChart"></canvas>
+              <canvas id="pieChart1"></canvas>
             </div>
           </div>
         </div>
@@ -203,4 +203,36 @@
   {{ super() }}
     <!-- Chart.js -->
     <script src="{{ url_for('static', filename='vendors/Chart.js/dist/Chart.min.js') }}"></script>
+    <script type="text/javascript">
+
+				  var ctx = document.getElementById("pieChart1");
+				  var data = {
+					datasets: [{
+					  data: [120, 50, 140, 180, 50],
+					  backgroundColor: [
+						"#455C73",
+						"#9B59B6",
+						"#BDC3C7",
+						"#26B99A",
+						"#3498DB"
+					  ],
+					  label: 'My dataset' // for legend
+					}],
+					labels: [
+					  "Dark Gray",
+					  "Purple",
+					  "Gray",
+					  "Green",
+					  "Blue"
+					]
+				  };
+
+				  var pieChart = new Chart(ctx, {
+					data: data,
+					type: 'pie',
+					otpions: {
+					  legend: false
+					}
+				  });
+    </script>
 {% endblock javascripts %}

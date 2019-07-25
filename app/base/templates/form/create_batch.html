@@ -7,7 +7,7 @@
         <div class="col-md-6 col-xs-12">
           {% with messages = get_flashed_messages() %}
             {% if messages %}
-              <ul class="alert alert-success">
+              <ul class="alert alert-success" id="alert-message">
                 {% for message in messages %}
                   <label>{{ message }}</label>
                 {% endfor %}
@@ -46,31 +46,22 @@
               <form id="demo-form" data-parsley-validate action="{{ url_for('base_blueprint.create_batch') }}"
                     method="post">
                 {% for field in batchForm if field.widget.input_type != 'hidden' %}
-                  {% if field.label.text == 'Start Date' or field.label.text == 'End Date' %}
-                    <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
-                      <div class="control-group">
-                        <div class="controls">
-                          <label>{{ field.label.text }}</label>
-                          {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
-                          <span class="fa fa-calendar-o form-control-feedback left" aria-hidden="true"></span>
-                          <span id="inputSuccess2Status" class="sr-only">(success)</span>
-                        </div>
-                      </div>
-
-                    </div>
-                  {% else %}
-                    <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
-                      <label>{{ field.label.text }}</label>
+                  <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
+                    <label>{{ field.label.text }}</label>
+                    {% if field.label.text == 'Name' %}
                       {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
-                      {% if field.label.text == 'Batch' %}
-                        <span class="fa fa-sitemap form-control-feedback left" aria-hidden="true"></span>
-                      {% elif field.label.text == 'Department' %}
-                        <span class="fa fa-building-o form-control-feedback left" aria-hidden="true"></span>
-                      {% else %}
-                        <span class="fa fa-code form-control-feedback left" aria-hidden="true"></span>
-                      {% endif %}
-                    </div>
-                  {% endif %}
+                      <span class="fa fa-sitemap form-control-feedback left" aria-hidden="true"></span>
+                    {% elif field.label.text == 'Code' %}
+                      {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                      <span class="fa fa-code form-control-feedback left" aria-hidden="true"></span>
+                    {% elif field.label.text == 'Department' %}
+                      {{ field(class="form-control has-feedback-left required", placeholder=field.label.text) }}
+                      <span class="fa fa-building-o form-control-feedback left" aria-hidden="true"></span>
+                    {% else %}
+                      {{ field(class="form-control has-feedback-left custom-date-picker required", placeholder=field.label.text) }}
+                      <span class="fa fa-calendar form-control-feedback left" aria-hidden="true"></span>
+                    {% endif %}
+                  </div>
                 {% endfor %}
                 <div class="col-sm-12">
                   <div class="text-center">
@@ -91,5 +82,14 @@
   {{ super() }}
   {#  <!-- Parsley -->#}
   <script src="{{ url_for('static', filename='vendors/parsleyjs/dist/parsley.min.js') }}"></script>
+  <script type="text/javascript">
+    setTimeout(function() {
+      $('#alert-message').hide();
+    }, 1500);
+     $('.custom-date-picker').daterangepicker({
+      singleDatePicker: true,
+      singleClasses: "picker_4"
+    });
+  </script>
 {% endblock javascripts %}
 
