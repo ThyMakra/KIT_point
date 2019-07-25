@@ -23,7 +23,7 @@
               </h2>
               <ul class="nav navbar-right panel_toolbox">
                 <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
-                <li><a href="/company/company"><i class="fa fa-list-alt"></i></a></li>
+                <li><a href="/company"><i class="fa fa-list-alt"></i></a></li>
                 <li><a href="#" id="save_company"><i class="fa fa-save"></i></a></li>
                 <li><a class="close-link"><i class="fa fa-close"></i></a>
                 </li>
@@ -91,6 +91,15 @@
   <script src="{{ url_for('static', filename='vendors/select2/dist/js/select2.full.min.js') }}"></script>
   <script src="{{ url_for('static', filename='vendors/select2/dist/js/select2.min.js') }}"></script>
   <script type="text/javascript">
+  let all_active = [];
+
+  {% for is_active in active_members %}    
+    all_active.push({{ is_active.student_id }});    
+  {% endfor %}
+  // console.log(typeof(all_active[0])); 
+  // element in 'all_active' is type "number"
+  
+  // console.log(all_active);
     $(document).ready(function() {
       $('#member').select2({
         placeholder: 'Select a member',
@@ -115,6 +124,82 @@
       $('#save_company').on('click', function() {
         $('#submit').trigger('click');      
       });
+    })    
+    // selecting president
+    $('#president').on('change', function(){
+        let member = $('#member').val();
+        let vice_president = $('#vice_president').val();
+        let president = $(this).val();  
+        // check if already active in other company
+        if (all_active != null && all_active.includes(parseInt(president))){                    
+          {% for is_active in active_members %}
+            if ({{ is_active.student_id }} == parseInt(president)){                                
+              alertify.notify('Already active in {{ is_active.company }}', 'error', 5);                
+            }
+          {% endfor %}
+          $(this).val(null).trigger('change');          
+        }
+        // if already selected as vice president, remove from vice presidents
+        if(vice_president != null && vice_president.includes(president)){          
+          // alertify.notify(`Remove ${$('this').select()} from vice president.`, 'warning', 5);
+          alertify.notify('Remove from vice president.', 'warning', 5);
+          $('#vice_president').val(vice_president.filter(x=>x!=president)).trigger('change');
+        }
+        // if already selected as member, remove from members
+        else if (member != null && member.includes(president)){          
+          alertify.notify('Remove from member.', 'warning', 5);
+          $('#member').val(member.filter(x=>x!=president)).trigger('change');
+        }                
+      })
+      // selecting vice president
+      $('#vice_president').on('select2:select', function(e){            
+      let vice_president = e.params.data.id;
+      let president = $('#president').val();
+      let member = $('#member').val();
+      // check if is the president
+      if (vice_president == president){
+        alertify.notify('Already assigned as leader.', 'error', 5);
+        $(this).val($(this).val().filter(x=>x!=president)).trigger('change');
+      }      
+      // check if already active
+      else if (all_active != null && all_active.includes(parseInt(vice_president))){        
+          {% for is_active in active_members %}
+            if ({{ is_active.student_id }} == parseInt(vice_president)){
+              alertify.notify('Already active in {{ is_active.company }}', 'error', 5);                
+            }
+          {% endfor %}
+          $(this).val($(this).val().filter(x=>x!=vice_president)).trigger('change');
+        }
+      // if already selected as member, remove from members
+      if (member != null && member.includes(vice_president)){        
+        alertify.notify('Remove from member.', 'warning', 5);
+        $('#member').val(member.filter(x=>x!=vice_president)).trigger('change');
+      }
+      })
+      // selecting members
+    $('#member').on('select2:select', function(e){            
+      let member = e.params.data.id;
+      let president = $('#president').val();
+      let vice_president = $('#vice_president').val();      
+      // check if is the president
+      if (member == president){        
+        alertify.notify('Already assigned as leader.', 'error', 5);
+        $(this).val($(this).val().filter(x=>x!=president)).trigger('change');
+      }
+      // check if in vice presidents list      
+      else if (vice_president != null && vice_president.includes(member)){        
+        alertify.notify('Already assigned as vice president.', 'error', 5);
+        $(this).val($(this).val().filter(x=>x!=member)).trigger('change');        
+      }
+      // check if already active
+      else if (all_active != null && all_active.includes(parseInt(member))){        
+          {% for is_active in active_members %}
+            if ({{ is_active.student_id }} == parseInt(member)){
+              alertify.notify('Already active in {{ is_active.company }}', 'error', 5);                
+            }
+          {% endfor %}          
+          $(this).val($(this).val().filter(x=>x!=member)).trigger('change');        
+      }
     })
   </script>
 {% endblock javascripts %}

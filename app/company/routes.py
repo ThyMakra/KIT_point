@@ -6,7 +6,7 @@ from flask_login import (
 from app import db
 from app.company import blueprint
 from app.company.forms import CreateCompanyForm, UpdateCompanyForm
-from app.company.models import Company
+from app.company.models import Company, CompanyMembers
 from app.student.models import Student
 from app.stakeholder.models import Stakeholder
 from datetime import datetime
@@ -23,7 +23,7 @@ def route_errors(error):
     return render_template('errors/page_{}.html'.format(error))
 
 
-@blueprint.route('/company')
+@blueprint.route('/')
 @login_required
 def get_company():
     company = db.session.query(Company).all()
@@ -31,27 +31,29 @@ def get_company():
     return render_template('company.html', companies=company, form=form)
 
 
-@blueprint.route('/delete<company_id>')
+@blueprint.route('/delete<int:company_id>')
 @login_required
 def delete_company(company_id):
     try:
         Company.query.filter_by(id=company_id).delete()
         db.session.commit()
         flash('Company deleted!')
-        return redirect('/company/company')
+        return redirect('/company')
     except Exception as e:
         print(e)
         flash('Delete error! some entities are referring to this')
-        return redirect('/company/company')
+        return redirect('/company')
 
 
-@blueprint.route('/<company_id>', methods=['GET', 'POST'])
+@blueprint.route('/<int:company_id>', methods=['GET', 'POST'])
 @login_required
-def update_company(company_id):
+def update_company(company_id):    
     form = UpdateCompanyForm(request.form)
     company = Company.query.filter_by(id=company_id).first()    
+    active_members = CompanyMembers.query.filter_by(status='Active').all()
+    # print("________-----",members[0].company_id)
     if request.method == 'GET':
-        return render_template('/update_company.html', form=form, company=company)
+        return render_template('/update_company.html', form=form, company=company, active_members=active_members)
     else:
         members_list = request.form.getlist('member')
         adviser_list = request.form.getlist('adviser')
@@ -100,17 +102,29 @@ def update_company(company_id):
         db.session.merge(company)
         db.session.commit()
         flash('Company updated')
-        return redirect('/company/company')        
+        return redirect('/company')        
+
+@blueprint.route('/company<int:company_id>/change_status<int:member_id>', methods=['GET', 'POST'])
+@login_required
+def change_member_status(company_id, member_id):    
+    member = CompanyMembers.query.filter_by(company_id=company_id, student_id=member_id).first()
+    if member.status == 'Active':
+        member.status = 'Not active'
+    else:
+        member.status = 'Active'
+    db.session.commit()
+    return redirect(url_for('company_blueprint.update_company', company_id=company_id))
+
 
 @blueprint.route('/create', methods=['GET', 'POST'])
 @login_required
 def create_company():    
     if request.method == 'GET':
         form = CreateCompanyForm(request.form)
-        return render_template('create_company.html', form=form)
+        active_members = CompanyMembers.query.filter_by(status='Active').all()
+        return render_template('create_company.html', form=form, active_members=active_members)
     name = request.form['name']
-    code = request.form['code']
-    #why is chairman got as a string
+    code = request.form['code']    
     chairman = request.form['chairman']    
     adviser_list = request.form.getlist('adviser')    
     established_date = request.form['established_date']
@@ -131,8 +145,9 @@ def create_company():
             company.advisers.append(adviser)
         # To add new member
         for i in vice_president_list:
-            vicepresident = db.session.query(Student).get(i)
-            company.vice_president.append(vicepresident)    
+            vice_president = db.session.query(Student).get(i)
+            company.vice_president.append(vice_president)
+            company.members.append(vice_president)
         for i in a2astaff_list:
             a2a_staff = db.session.query(Stakeholder).get(i)
             company.a2a_staff.append(a2a_staff)
@@ -144,8 +159,7 @@ def create_company():
         company.created_at = datetime.now()
         db.session.add(company)
         db.session.commit()
-        flash('Company created')
-        return redirect('/company/company')        
+        flash('Company created')            
     else:
         form = CreateCompanyForm(request.form)
         error = 'Duplicate entry'

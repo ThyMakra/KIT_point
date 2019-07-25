@@ -29,11 +29,12 @@ CompanyVicepresident = db.Table('company_vicepresidents',
 class CompanyMembers(db.Model):
     __tablename__ = 'company_members'
     id = Column(Integer, primary_key=True)
-    company_id = Column(Integer, db.ForeignKey('company.id'))
+    company_id = Column(Integer, db.ForeignKey('company.id', ondelete='CASCADE'))
     company = db.relationship('Company', backref='association')
-    student_id = Column(Integer, db.ForeignKey('student.id'))
+    student_id = Column(Integer, db.ForeignKey('student.id', ondelete='CASCADE'))
     student = db.relationship('Student', backref='association')
     status = db.Column(String(10), default='Active')
+
 
 class Company(db.Model):
     # __tablename__ = 'company'
@@ -42,7 +43,7 @@ class Company(db.Model):
     code = Column(String(20), unique=True)
     # using many_to_one relationship for chairman and president    
     chairman_id = Column(Integer, db.ForeignKey('stakeholder.id'))
-    # chairman_re represents the 'Stakeholder' object that has id the same as chairman id
+    # chairman_re represents the 'Stakeholder' object with PK=chairman_id
     chairman = db.relationship('Stakeholder', backref='chairmanOf', lazy=True)
     president_id = Column(Integer, db.ForeignKey('student.id'))
     president = db.relationship('Student', backref='presidentOf', lazy=True)    

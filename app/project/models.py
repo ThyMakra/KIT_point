@@ -46,7 +46,7 @@ class Project(db.Model):
     name = Column(String(80), unique=True)
     code = Column(String(20), unique=True)
     status_id = Column(Integer, db.ForeignKey('status.id'))
-    company_id = Column(Integer, db.ForeignKey('company.id'))
+    company_id = Column(Integer, db.ForeignKey('company.id', ondelete='CASCADE'))
     description = Column(String)
     chairman_remark = Column(String)
     president_remark = Column(String)

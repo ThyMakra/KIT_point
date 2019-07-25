@@ -135,8 +135,11 @@
       $('#leader').on('change', function(){
         // $('#member').select2('open');
         let member = $('#member').val()
-        if (member!=null)
+        if (member != null){
+          if ($(this).val() == member){
             $('#member').val(member.filter(x=>x!=$(this).val())).trigger('change');
+          }
+        }
       })
       $('#member').on('change', function() {        
         let member = $(this).val();

@@ -24,7 +24,7 @@
               </h2>
               <ul class="nav navbar-right panel_toolbox">
                 <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
-                <li><a href="/company/company"><i class="fa fa-list-alt"></i></a></li>
+                <li><a href="/company"><i class="fa fa-list-alt"></i></a></li>
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i
                     class="fa fa-wrench"></i></a>
@@ -93,18 +93,17 @@
                       </li>                      
                     </ul>
                   <div id="myTabContent" class="tab-content">
-                    <div role="tabpanel" class="tab-pane fade active in" id="tab_content1" aria-labelledby="member-tab">                                    
-                      <table id="datatable-responsive"
+                    <div role="tabpanel" class="tab-pane fade active in" id="tab_content1" aria-labelledby="member-tab">                                                          
+                      <table id="member-datatable"
                              class="table table-striped table-bordered table-hover dt-responsive nowrap" cellspacing="0"
                              width="100%">
                         <thead>
                           <tr>
-                            <th>Name</th>                        
-                            <th>Roll Number</th>
-                            <th>Gender</th>
-                            <!-- <th onclick="sortTable(4)">Batch</th> -->
+                            <th>Name</th>               
+                            <th>Roll Number</th>                            
+                            <th>Gender</th>                            
                             <th>Batch</th>                            
-                            <th>Status</th>
+                            <th style="width: 10%">Status</th>
                             <th style="width: 10%">Change Status</th>
                             <th style="width: 5%">Remove</th>
                           </tr>
@@ -116,21 +115,17 @@
                             <td>{{ member.roll_number }}</td>
                             <td>{{ member.gender }}</td>
                             <td>{{ member.batch }}</td>                            
-                            <td>
-                            {% for i in member.association if i.company_id == company.id %}
-                              {{ i.status }}
-                            {% endfor %}
-                            </td>
-                            <td><a href="#" class="btn btn-info btn-xs"><i class="fa fa-pencil"></i> Change </a></td>
-                            <td><a href="/company/{{ company.id }}/{{ member.id }}" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> Remove </a></td>                                               
+                            <td>{% for i in member.association if i.company_id == company.id %}{{ i.status }}{% endfor %}</td>
+                            <td><a href="company{{ company.id }}/change_status{{ member.id }}" class="btn btn-info btn-xs"><i class="fa fa-rotate-right"></i> Change </a></td>
+                            <td><button class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> Remove </button></td>
                           </tr>
                         {% endfor %}
                         </tbody>
                       </table>
                     </div>
-
+                    
                     <div role="tabpanel" class="tab-pane fade" id="tab_content2" aria-labelledby="project-tab">
-                        <table id="datatable-responsive"
+                        <table id="project-datatable"
                            class="table table-striped table-bordered table-hover dt-responsive nowrap" cellspacing="0"
                            width="100%">
                           <thead>
@@ -245,26 +240,36 @@
     let advisers = [];
     let vice_presidents = [];
     let a2a_staffs = [];
+    let all_active = [];
         
     let $member = $('#member');
     let $adviser = $('#adviser');
     let $vice_president = $('#vice_president');
     let $a2a_staff = $('#a2a_staff');
-
-    {% for member in company.members %}
-      members.push({{ member.id }});
-    {% endfor %}
+            
     {% for adviser in company.advisers %}
       advisers.push({{ adviser.id }});
-    {% endfor %}
+    {% endfor %}    
     {% for vice_president in company.vice_president %}
       vice_presidents.push({{ vice_president.id }});
     {% endfor %}
     {% for a2a_staff in company.a2a_staff %}
       a2a_staffs.push({{ a2a_staff.id }});
     {% endfor %}
+    {% for member in company.members %}    
+      members.push({{ member.id }});       
+    {% endfor %}        
+    {% for is_active in active_members %}                    
+      all_active.push({{ is_active.student_id }});
+    {% endfor %}
+    //remove active member from current company, so get only other active member in other companies    
+    // console.log(all_active);
+    // console.log(members)
+    all_active = all_active.filter(x=>members.indexOf(x) < 0);  
+    // console.log(all_active);
+    
     $(document).ready(function() {
-      $('#name').val('{{ company.name }}');
+      $('#name').val('{{ company.name }}');      
       $('#code').val('{{ company.code }}');
       $('#description').val('{{ company.description }}');
       $('#chairman').val('{{ company.chairman_id }}');
@@ -289,7 +294,7 @@
       $('#save_company').on('click', function() {
         $('#submit').trigger('click');
       });
-      $member.val(members);
+      $member.val(members);      
       $member.trigger('change');
       $adviser.val(advisers);
       $adviser.trigger('change');
@@ -302,80 +307,83 @@
 			  singleDatePicker: true,
 			  singleClasses: "picker_1"
       });
+      });
     });
-    $('#member').on('change', function() {
-      let member = $(this).val();            
-      member = parseInt(member[0]);
-      // $('#name').val(member).trigger('change');
-      let president = parseInt($('#president').val());
-      // $('#code').val(president).trigger('change');
-      if (member === president){
-        // alertify.notify('Already assigned as president.', 'error', 5);
-        $('#member').val(null).trigger('change')
-        // setTimeout(function() {
-        //     window.location.reload()
-        //   }, 1000)
-      }
-    })
-    });
-    
-  </script>
-  <!-- <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.3.1.js"></script> -->
-  <script>
-    // function sortTable(n) {
-    //   var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-    //   table = document.getElementById("datatable-responsive");
-    //   switching = true;
-    //   // Set the sorting direction to ascending:
-    //   dir = "asc"; 
-    //   /* Make a loop that will continue until
-    //   no switching has been done: */
-    //   while (switching) {
-    //     // Start by saying: no switching is done:
-    //     switching = false;
-    //     rows = table.rows;
-    //     /* Loop through all table rows (except the
-    //     first, which contains table headers): */
-    //     for (i = 1; i < (rows.length - 1); i++) {
-    //       // Start by saying there should be no switching:
-    //       shouldSwitch = false;
-    //       /* Get the two elements you want to compare,
-    //       one from current row and one from the next: */
-    //       x = rows[i].getElementsByTagName("TD")[n];
-    //       y = rows[i + 1].getElementsByTagName("TD")[n];
-    //       /* Check if the two rows should switch place,
-    //       based on the direction, asc or desc: */
-    //       if (dir == "asc") {
-    //         if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-    //           // If so, mark as a switch and break the loop:
-    //           shouldSwitch = true;
-    //           break;
-    //         }
-    //       } else if (dir == "desc") {
-    //         if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-    //           // If so, mark as a switch and break the loop:
-    //           shouldSwitch = true;
-    //           break;
-    //         }
-    //       }
-    //     }
-    //     if (shouldSwitch) {
-    //       /* If a switch has been marked, make the switch
-    //       and mark that a switch has been done: */
-    //       rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-    //       switching = true;
-    //       // Each time a switch is done, increase this count by 1:
-    //       switchcount ++; 
-    //     } else {
-    //       /* If no switching has been done AND the direction is "asc",
-    //       set the direction to "desc" and run the while loop again. */
-    //       if (switchcount == 0 && dir == "asc") {
-    //         dir = "desc";
-    //         switching = true;
-    //       }
-    //     }
-    //   }
-    // }
-    </script>
+  $('#president').on('change', function(){
+    let member = $('#member').val();
+    let vice_president = $('#vice_president').val();
+    let president = $(this).val();  
+    // check if already active in other company
+    if (all_active != null && all_active.includes(parseInt(president))){                    
+      {% for is_active in active_members %}
+        if ({{ is_active.student_id }} == parseInt(president)){                                
+          alertify.notify('Already active in {{ is_active.company }}', 'error', 5);                
+        }
+      {% endfor %}
+      $(this).val(null).trigger('change');          
+    }
+    // if already selected as vice president, remove from vice presidents
+    if(vice_president != null && vice_president.includes(president)){          
+      // alertify.notify(`Remove ${$('this').select()} from vice president.`, 'warning', 5);
+      alertify.notify('Remove from vice president.', 'warning', 5);
+      $('#vice_president').val(vice_president.filter(x=>x!=president)).trigger('change');
+    }
+    // if already selected as member, remove from members
+    else if (member != null && member.includes(president)){          
+      alertify.notify('Remove from member.', 'warning', 5);
+      $('#member').val(member.filter(x=>x!=president)).trigger('change');
+    }                
+  })
+  // selecting vice president
+  $('#vice_president').on('select2:select', function(e){            
+  let vice_president = e.params.data.id;
+  let president = $('#president').val();
+  let member = $('#member').val();
+  // check if is the president
+  if (vice_president == president){
+    alertify.notify('Already assigned as leader.', 'error', 5);
+    $(this).val($(this).val().filter(x=>x!=president)).trigger('change');
+  }      
+  // check if already active
+  else if (all_active != null && all_active.includes(parseInt(vice_president))){        
+      {% for is_active in active_members %}
+        if ({{ is_active.student_id }} == parseInt(vice_president)){
+          alertify.notify('Already active in {{ is_active.company }}', 'error', 5);                
+        }
+      {% endfor %}
+      $(this).val($(this).val().filter(x=>x!=vice_president)).trigger('change');
+    }
+  // if already selected as member, remove from members
+  if (member != null && member.includes(vice_president)){        
+    alertify.notify('Remove from member.', 'warning', 5);
+    $('#member').val(member.filter(x=>x!=vice_president)).trigger('change');
+    }
+  })
+  // selecting members
+  $('#member').on('select2:select', function(e){            
+    let member = e.params.data.id;
+    let president = $('#president').val();
+    let vice_president = $('#vice_president').val();      
+    // check if is the president
+    if (member == president){        
+      alertify.notify('Already assigned as leader.', 'error', 5);
+      $(this).val($(this).val().filter(x=>x!=president)).trigger('change');
+    }
+    // check if in vice presidents list      
+    else if (vice_president != null && vice_president.includes(member)){        
+      alertify.notify('Already assigned as vice president.', 'error', 5);
+      $(this).val($(this).val().filter(x=>x!=member)).trigger('change');        
+    }
+    // check if already active
+    else if (all_active != null && all_active.includes(parseInt(member))){        
+        {% for is_active in active_members %}
+          if ({{ is_active.student_id }} == parseInt(member)){
+            alertify.notify('Already active in {{ is_active.company }}', 'error', 5);                
+          }
+        {% endfor %}          
+        $(this).val($(this).val().filter(x=>x!=member)).trigger('change');        
+    }
+  })
+ 
+  </script>  
 {% endblock javascripts %}
