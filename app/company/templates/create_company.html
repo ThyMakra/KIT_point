@@ -94,7 +94,7 @@
   let all_active = [];
 
   {% for is_active in active_members %}    
-    all_active.push({{ is_active.student_id }});    
+    all_active.push({{ is_active.student_id }});
   {% endfor %}
   // console.log(typeof(all_active[0])); 
   // element in 'all_active' is type "number"
@@ -152,14 +152,14 @@
         }                
       })
       // selecting vice president
-      $('#vice_president').on('select2:select', function(e){            
-      let vice_president = e.params.data.id;
+      $('#vice_president').on('select2:selecting', function(e){            
+      let vice_president = e.params.args.data.id;
       let president = $('#president').val();
       let member = $('#member').val();
       // check if is the president
       if (vice_president == president){
         alertify.notify('Already assigned as leader.', 'error', 5);
-        $(this).val($(this).val().filter(x=>x!=president)).trigger('change');
+        e.preventDefault();
       }      
       // check if already active
       else if (all_active != null && all_active.includes(parseInt(vice_president))){        
@@ -168,7 +168,7 @@
               alertify.notify('Already active in {{ is_active.company }}', 'error', 5);                
             }
           {% endfor %}
-          $(this).val($(this).val().filter(x=>x!=vice_president)).trigger('change');
+          e.preventDefault();
         }
       // if already selected as member, remove from members
       if (member != null && member.includes(vice_president)){        
@@ -177,19 +177,19 @@
       }
       })
       // selecting members
-    $('#member').on('select2:select', function(e){            
-      let member = e.params.data.id;
+    $('#member').on('select2:selecting', function(e){            
+      let member = e.params.args.data.id;
       let president = $('#president').val();
       let vice_president = $('#vice_president').val();      
       // check if is the president
       if (member == president){        
         alertify.notify('Already assigned as leader.', 'error', 5);
-        $(this).val($(this).val().filter(x=>x!=president)).trigger('change');
+        e.preventDefault();
       }
       // check if in vice presidents list      
       else if (vice_president != null && vice_president.includes(member)){        
         alertify.notify('Already assigned as vice president.', 'error', 5);
-        $(this).val($(this).val().filter(x=>x!=member)).trigger('change');        
+        e.preventDefault();        
       }
       // check if already active
       else if (all_active != null && all_active.includes(parseInt(member))){        
@@ -198,7 +198,7 @@
               alertify.notify('Already active in {{ is_active.company }}', 'error', 5);                
             }
           {% endfor %}          
-          $(this).val($(this).val().filter(x=>x!=member)).trigger('change');        
+          e.preventDefault();        
       }
     })
   </script>

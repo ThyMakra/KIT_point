@@ -20,10 +20,10 @@ def route_default():
     return redirect(url_for('base_blueprint.login'))
 
 
-# @blueprint.route('/<template>')
-# @login_required
-# def route_template(template):
-#     return render_template(template + '.html')
+@blueprint.route('/<template>')
+@login_required
+def route_template(template):
+    return render_template(template + '.html')
 
 
 @blueprint.route('/fixed_<template>')
